@@ -64,7 +64,8 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     page?.components?.map(comp => ({
       id: comp.id,
       type: comp.type,
-      settings: comp.settings
+      settings: comp.settings,
+      content: null
     })) || []
   );
   const [selectedComponent, setSelectedComponent] = useState<PageComponent | null>(null);
@@ -121,8 +122,14 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
 
   const updateComponentContent = (content: Content) => {
     setComponents(components.map(c =>
-      c.id === selectedComponent?.id ? { ...c, content: content } : c
+      c.id === selectedComponent?.id ? { ...c, content } : c
     ));
+    
+    toast({
+      title: "Content Selected",
+      description: `Content '${content.translations[0]?.title || 'Untitled'}' has been added to the component`,
+    });
+    
     setIsContentPickerOpen(false);
     setSelectedComponent(null);
     setSelectedPosition(null);
@@ -215,6 +222,11 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
                                         Pick Content
                                       </Button>
                                     </div>
+                                    {component.content && (
+                                      <div className="mt-2 text-xs p-1 bg-violet-50 rounded border border-violet-100">
+                                        Selected: {component.content.translations[0]?.title || 'Untitled'}
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                                 
@@ -266,7 +278,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
         </DialogFooter>
       </DialogContent>
 
-      {/* Make sure we pass the correct props to match ComponentSettingsDialog's interface */}
+      {/* Make sure we pass the correct component data to the dialogs */}
       <ComponentSettingsDialog
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
@@ -278,6 +290,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
         onOpenChange={setIsContentPickerOpen}
         component={selectedComponent as any}
         position={selectedPosition}
+        onSelectContent={updateComponentContent}
       />
     </Dialog>
   );

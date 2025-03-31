@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -32,6 +32,35 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
   const [title, setTitle] = useState(page?.title || '');
   const [slug, setSlug] = useState(page?.slug || '');
   const [status, setStatus] = useState<'draft' | 'published'>(page?.status || 'draft');
+
+  // Reset form when dialog opens with new page data
+  useEffect(() => {
+    if (open) {
+      setTitle(page?.title || '');
+      setSlug(page?.slug || '');
+      setStatus(page?.status || 'draft');
+    }
+  }, [open, page]);
+
+  // Generate a slug from title
+  const generateSlug = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    
+    // Only auto-generate slug if it's a new page or the slug is empty
+    if (!isEditing || slug === '') {
+      setSlug(generateSlug(newTitle));
+    }
+  };
 
   const handleSave = () => {
     if (!title) {
@@ -80,7 +109,7 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
               id="title" 
               placeholder="Page title" 
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={handleTitleChange}
             />
           </div>
           
@@ -107,7 +136,7 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
               value={status} 
               onValueChange={(value: 'draft' | 'published') => setStatus(value)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>

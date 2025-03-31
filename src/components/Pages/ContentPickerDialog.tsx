@@ -42,30 +42,36 @@ interface ContentPickerDialogProps {
   onOpenChange: (open: boolean) => void;
   component: Component | null;
   position: string | null;
+  onSelectContent?: (content: Content) => void;
 }
 
 export const ContentPickerDialog = ({ 
   open, 
   onOpenChange, 
   component,
-  position
+  position,
+  onSelectContent
 }: ContentPickerDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedContentId, setSelectedContentId] = useState<string | null>(
-    component?.contents.find(c => c.position === position)?.contentId || null
-  );
+  const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
   const [view, setView] = useState<'grid' | 'list'>('list');
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && component && position) {
-      const currentContentId = component.contents.find(c => c.position === position)?.contentId || null;
-      setSelectedContentId(currentContentId);
+      // Only attempt to set selectedContentId if component.contents exists
+      if (component.contents) {
+        const currentContentId = component.contents.find(c => c.position === position)?.contentId || null;
+        setSelectedContentId(currentContentId);
+      } else {
+        setSelectedContentId(null);
+      }
     }
   }, [open, component, position]);
   
-  if (!component || !position) return null;
+  // Early return with null if dialog should not be shown
+  if (!open || !component || !position) return null;
   
   const filteredContents = contents.filter(content => {
     // Apply search query filter
@@ -97,12 +103,17 @@ export const ContentPickerDialog = ({
   
   const handleConfirm = () => {
     if (selectedContentId) {
-      // Here you would update the component content in real app
-      toast({
-        title: "Content Selected",
-        description: `Content has been assigned to position ${position}`,
-        duration: 3000,
-      });
+      const selectedContent = contents.find(content => content.id === selectedContentId);
+      if (selectedContent && onSelectContent) {
+        onSelectContent(selectedContent);
+      } else {
+        // Notify the user of success
+        toast({
+          title: "Content Selected",
+          description: `Content has been assigned to position ${position}`,
+          duration: 3000,
+        });
+      }
       onOpenChange(false);
     }
   };
