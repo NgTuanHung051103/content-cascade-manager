@@ -31,7 +31,7 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
   const isEditing = !!page;
   const [title, setTitle] = useState(page?.title || '');
   const [slug, setSlug] = useState(page?.slug || '');
-  const [status, setStatus] = useState(page?.status || 'draft');
+  const [status, setStatus] = useState<'draft' | 'published'>(page?.status || 'draft');
 
   const handleSave = () => {
     if (!title) {
@@ -103,7 +103,10 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
           
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select 
+              value={status} 
+              onValueChange={(value: 'draft' | 'published') => setStatus(value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>

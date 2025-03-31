@@ -266,11 +266,11 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
         </DialogFooter>
       </DialogContent>
 
+      {/* Make sure we pass the correct props to match ComponentSettingsDialog's interface */}
       <ComponentSettingsDialog
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
         component={selectedComponent as any}
-        onSave={updateComponentSettings}
       />
 
       <ContentPickerDialog
