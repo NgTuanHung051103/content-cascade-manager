@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Page } from '@/data/mockData';
+import { toast } from '@/components/ui/use-toast';
 import { 
   Select, 
   SelectContent, 
@@ -28,6 +29,37 @@ interface PageDialogProps {
 
 export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
   const isEditing = !!page;
+  const [title, setTitle] = useState(page?.title || '');
+  const [slug, setSlug] = useState(page?.slug || '');
+  const [status, setStatus] = useState(page?.status || 'draft');
+
+  const handleSave = () => {
+    if (!title) {
+      toast({
+        title: "Validation Error",
+        description: "Page title is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!slug) {
+      toast({
+        title: "Validation Error",
+        description: "URL slug is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // In a real application, this would call an API to save the page
+    toast({
+      title: isEditing ? "Page Updated" : "Page Created",
+      description: `${title} has been ${isEditing ? 'updated' : 'created'} successfully.`,
+    });
+    
+    onOpenChange(false);
+  };
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -47,7 +79,8 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
             <Input 
               id="title" 
               placeholder="Page title" 
-              defaultValue={page?.title}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           
@@ -58,18 +91,19 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
               <Input 
                 id="slug" 
                 placeholder="page-slug" 
-                defaultValue={page?.slug}
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
                 className="flex-1"
               />
             </div>
             <p className="text-xs text-gray-500">
-              The URL slug is used in the page's URL: example.com/<strong>{page?.slug || 'page-slug'}</strong>
+              The URL slug is used in the page's URL: example.com/<strong>{slug || 'page-slug'}</strong>
             </p>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select defaultValue={page?.status || "draft"}>
+            <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
@@ -85,7 +119,7 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button>{isEditing ? 'Save Changes' : 'Create Page'}</Button>
+          <Button onClick={handleSave}>{isEditing ? 'Save Changes' : 'Create Page'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

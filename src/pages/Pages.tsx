@@ -8,7 +8,8 @@ import {
   MoreHorizontal, 
   Eye, 
   Copy, 
-  Clock
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -30,18 +31,31 @@ import {
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { pages } from '@/data/mockData';
 import { PageDialog } from '@/components/Pages/PageDialog';
 import { Page } from '@/data/mockData';
 import { PageBuilder } from '@/components/Pages/PageBuilder';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/use-toast";
 
 export const Pages = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleAddPage = () => {
     setSelectedPage(null);
@@ -58,6 +72,20 @@ export const Pages = () => {
     setIsBuilderOpen(true);
   };
 
+  const handleDeletePage = (page: Page) => {
+    setSelectedPage(page);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeletePage = () => {
+    // In a real application, this would call an API to delete the page
+    toast({
+      title: "Page Deleted",
+      description: `${selectedPage?.title} has been deleted successfully.`,
+    });
+    setIsDeleteDialogOpen(false);
+  };
+
   // Format date from ISO string
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -66,6 +94,24 @@ export const Pages = () => {
       month: 'short',
       day: 'numeric'
     }).format(date);
+  };
+
+  // Get component count badge with color
+  const getComponentCountBadge = (count: number) => {
+    if (count === 0) {
+      return (
+        <Badge variant="outline" className="text-amber-500 border-amber-200 bg-amber-50">
+          <AlertTriangle className="h-3 w-3 mr-1" />
+          Empty
+        </Badge>
+      );
+    }
+    
+    return (
+      <Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-700">
+        {count}
+      </Badge>
+    );
   };
 
   return (
@@ -123,7 +169,7 @@ export const Pages = () => {
                       {page.status.charAt(0).toUpperCase() + page.status.slice(1)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{page.components.length}</TableCell>
+                  <TableCell>{getComponentCountBadge(page.components.length)}</TableCell>
                   <TableCell>{formatDate(page.updatedAt)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -149,7 +195,11 @@ export const Pages = () => {
                           <Copy className="h-4 w-4 mr-2" />
                           Duplicate
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-red-600"
+                          onClick={() => handleDeletePage(page)}
+                        >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </DropdownMenuItem>
@@ -174,6 +224,27 @@ export const Pages = () => {
         onOpenChange={setIsBuilderOpen}
         page={selectedPage}
       />
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the page "{selectedPage?.title}". 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeletePage}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
