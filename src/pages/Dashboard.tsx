@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, LineChart, PieChart } from '@/components/ui/chart';
+import { BarChart } from '@/components/ui/charts/BarChart';
+import { LineChart } from '@/components/ui/charts/LineChart';
+import { PieChart } from '@/components/ui/charts/PieChart';
 import { 
   FileText, 
   FolderTree, 

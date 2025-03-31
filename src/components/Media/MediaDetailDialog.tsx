@@ -1,18 +1,20 @@
-
 import React from 'react';
 import { 
   Dialog, 
   DialogContent, 
   DialogDescription, 
+  DialogFooter, 
   DialogHeader, 
   DialogTitle 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { 
+  Calendar,
+  FileType,
+  LayoutGrid,
+  User
+} from 'lucide-react';
 import { Image } from '@/data/mockData';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Copy, Calendar, DimensionsIcon, FileText } from 'lucide-react';
-import { toast } from "@/components/ui/use-toast";
 
 interface MediaDetailDialogProps {
   open: boolean;
@@ -21,120 +23,95 @@ interface MediaDetailDialogProps {
 }
 
 export const MediaDetailDialog = ({ open, onOpenChange, image }: MediaDetailDialogProps) => {
-  if (!image) return null;
-  
-  const handleCopyUrl = (url: string) => {
-    navigator.clipboard.writeText(url);
-    toast({
-      title: "URL Copied",
-      description: "Image URL has been copied to clipboard",
-      duration: 3000,
-    });
-  };
-  
-  // Format file size from bytes to KB/MB
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' bytes';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-  
-  // Format date from ISO string
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
+  const isEditing = !!image;
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Image Details</DialogTitle>
+          <DialogTitle>{isEditing ? 'Media Details' : 'No Media Selected'}</DialogTitle>
           <DialogDescription>
-            View and edit the details of this image
+            {isEditing 
+              ? 'View and edit the details of the selected media item.'
+              : 'Select a media item to view its details.'}
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="rounded-md overflow-hidden border">
+        {image ? (
+          <div className="grid grid-cols-2 gap-4 py-4">
+            {/* Image Preview */}
+            <div className="col-span-2 md:col-span-1">
               <img 
-                src={image.path}
-                alt={image.alt}
-                className="w-full h-auto"
+                src={image.url} 
+                alt={image.altText} 
+                className="w-full rounded-md aspect-video object-cover" 
               />
             </div>
-          </div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="filename">Filename</Label>
-              <Input id="filename" value={image.filename} readOnly />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="alt">Alternative Text</Label>
-              <Input id="alt" defaultValue={image.alt} />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="url">URL</Label>
-              <div className="flex space-x-2">
-                <Input id="url" value={image.path} readOnly className="flex-1" />
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={() => handleCopyUrl(image.path)}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
+
+            {/* Details */}
+            <div className="col-span-2 md:col-span-1 space-y-4">
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-600">Filename</h4>
+                <p className="text-gray-800">{image.filename}</p>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-sm text-gray-500">File Type</Label>
-                <div className="flex items-center">
-                  <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                  {image.mimetype}
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-600">Alt Text</h4>
+                <p className="text-gray-800">{image.altText}</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-600">File Type</h4>
+                <div className="flex items-center space-x-2">
+                  <FileType className="h-4 w-4 text-gray-500" />
+                  <p className="text-gray-800">{image.fileType}</p>
                 </div>
               </div>
-              <div className="space-y-1">
-                <Label className="text-sm text-gray-500">File Size</Label>
-                <div className="flex items-center">
-                  <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                  {formatFileSize(image.size)}
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-600">File Size</h4>
+                <p className="text-gray-800">{image.fileSize}</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-600">Dimensions</h4>
+                <div className="flex items-center space-x-2">
+                  <LayoutGrid className="h-4 w-4 text-gray-500" />
+                  <p className="text-gray-800">{image.width} x {image.height}</p>
                 </div>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-sm text-gray-500">Dimensions</Label>
-                <div className="flex items-center">
-                  <DimensionsIcon className="h-4 w-4 mr-2 text-gray-500" />
-                  {image.width} × {image.height}
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-600">Uploaded By</h4>
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <p className="text-gray-800">{image.uploadedBy}</p>
                 </div>
               </div>
-              <div className="space-y-1">
-                <Label className="text-sm text-gray-500">Uploaded On</Label>
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                  {formatDate(image.createdAt)}
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-600">Uploaded On</h4>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <p className="text-gray-800">{new Date(image.uploadedOn).toLocaleDateString()}</p>
                 </div>
               </div>
-            </div>
-            
-            <div className="pt-4">
-              <Button className="w-full">Save Changes</Button>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="py-4">
+            <p className="text-gray-500">No media item selected.</p>
+          </div>
+        )}
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          {isEditing && (
+            <Button>Save Changes</Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
