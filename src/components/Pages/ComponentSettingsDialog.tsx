@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -11,7 +11,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Component } from '@/data/mockData';
 import { 
   Select, 
   SelectContent, 
@@ -20,15 +19,60 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { toast } from '@/components/ui/use-toast';
+
+interface Component {
+  id: string;
+  type: string;
+  name?: string;
+  order?: number;
+  settings?: any;
+}
 
 interface ComponentSettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   component: Component | null;
+  onSaveSettings?: (settings: any) => void;
 }
 
-export const ComponentSettingsDialog = ({ open, onOpenChange, component }: ComponentSettingsDialogProps) => {
+export const ComponentSettingsDialog = ({ 
+  open, 
+  onOpenChange, 
+  component, 
+  onSaveSettings 
+}: ComponentSettingsDialogProps) => {
+  const [name, setName] = useState(component?.name || '');
+  const [order, setOrder] = useState(component?.order || 1);
+  const [settings, setSettings] = useState(component?.settings || {});
+
   if (!component) return null;
+  
+  const updateSetting = (key: string, value: any) => {
+    setSettings({
+      ...settings,
+      [key]: value
+    });
+  };
+
+  const handleSave = () => {
+    const updatedSettings = {
+      ...settings,
+      name,
+      order
+    };
+    
+    if (onSaveSettings) {
+      onSaveSettings(updatedSettings);
+    }
+    
+    toast({
+      title: "Settings Saved",
+      description: "Component settings have been updated successfully",
+    });
+    
+    onOpenChange(false);
+  };
   
   const renderComponentSettings = () => {
     switch (component.type) {
@@ -37,7 +81,10 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
           <>
             <div className="space-y-2">
               <Label htmlFor="background">Background</Label>
-              <Select defaultValue={component.settings.background}>
+              <Select 
+                defaultValue={settings.background || 'light'}
+                onValueChange={(value) => updateSetting('background', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select background style" />
                 </SelectTrigger>
@@ -51,7 +98,10 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
             
             <div className="space-y-2">
               <Label htmlFor="height">Banner Height</Label>
-              <Select defaultValue={component.settings.height}>
+              <Select 
+                defaultValue={settings.height || 'medium'}
+                onValueChange={(value) => updateSetting('height', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
@@ -70,7 +120,10 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
           <>
             <div className="space-y-2">
               <Label htmlFor="columns">Columns</Label>
-              <Select defaultValue={component.settings.columns.toString()}>
+              <Select 
+                defaultValue={settings.columns?.toString() || '3'}
+                onValueChange={(value) => updateSetting('columns', parseInt(value))}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select number of columns" />
                 </SelectTrigger>
@@ -84,7 +137,11 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
             </div>
             
             <div className="flex items-center space-x-2">
-              <Switch id="show-image" defaultChecked={component.settings.showImage} />
+              <Switch 
+                id="show-image" 
+                checked={settings.showImage === undefined ? true : settings.showImage}
+                onCheckedChange={(checked) => updateSetting('showImage', checked)}
+              />
               <Label htmlFor="show-image">Show Featured Image</Label>
             </div>
           </>
@@ -95,7 +152,10 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
           <>
             <div className="space-y-2">
               <Label htmlFor="columns">Columns</Label>
-              <Select defaultValue={component.settings.columns.toString()}>
+              <Select 
+                defaultValue={settings.columns?.toString() || '3'}
+                onValueChange={(value) => updateSetting('columns', parseInt(value))}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select number of columns" />
                 </SelectTrigger>
@@ -110,7 +170,10 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
             
             <div className="space-y-2">
               <Label htmlFor="rows">Rows</Label>
-              <Select defaultValue={component.settings.rows.toString()}>
+              <Select 
+                defaultValue={settings.rows?.toString() || '2'}
+                onValueChange={(value) => updateSetting('rows', parseInt(value))}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select number of rows" />
                 </SelectTrigger>
@@ -128,7 +191,7 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
       default:
         return (
           <div className="p-4 bg-gray-100 rounded-md">
-            <p>No settings available for this component type.</p>
+            <p>No specific settings available for this component type.</p>
           </div>
         );
     }
@@ -149,7 +212,8 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
             <Label htmlFor="name">Component Name</Label>
             <Input 
               id="name" 
-              defaultValue={component.name}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Enter component name" 
             />
           </div>
@@ -159,7 +223,8 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
             <Input 
               id="order" 
               type="number" 
-              defaultValue={component.order}
+              value={order}
+              onChange={(e) => setOrder(parseInt(e.target.value))}
               min="1"
             />
           </div>
@@ -171,7 +236,7 @@ export const ComponentSettingsDialog = ({ open, onOpenChange, component }: Compo
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button>Save Settings</Button>
+          <Button onClick={handleSave}>Save Settings</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -87,6 +87,7 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
       description: `${title} has been ${isEditing ? 'updated' : 'created'} successfully.`,
     });
     
+    // Close the dialog
     onOpenChange(false);
   };
   

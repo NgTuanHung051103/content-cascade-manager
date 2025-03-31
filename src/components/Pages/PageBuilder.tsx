@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   DragDropContext, 
   Droppable, 
@@ -11,7 +11,8 @@ import {
   DialogContent, 
   DialogFooter, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogDescription 
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -60,18 +61,25 @@ interface PageBuilderProps {
 }
 
 export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
-  const [components, setComponents] = useState<PageComponent[]>(
-    page?.components?.map(comp => ({
-      id: comp.id,
-      type: comp.type,
-      settings: comp.settings,
-      content: null
-    })) || []
-  );
+  const [components, setComponents] = useState<PageComponent[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<PageComponent | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isContentPickerOpen, setIsContentPickerOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<string | null>(null);
+
+  // Reset and load components when page changes or dialog opens
+  useEffect(() => {
+    if (open && page) {
+      setComponents(
+        page.components?.map(comp => ({
+          id: comp.id,
+          type: comp.type,
+          settings: comp.settings || {},
+          content: comp.content || null
+        })) || []
+      );
+    }
+  }, [open, page]);
 
   const onDragEnd = (result: any) => {
     if (!result.destination) {
@@ -107,11 +115,13 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
   };
 
   const updateComponentSettings = (newSettings: any) => {
-    setComponents(components.map(c =>
-      c.id === selectedComponent?.id ? { ...c, settings: newSettings } : c
-    ));
-    setIsSettingsOpen(false);
-    setSelectedComponent(null);
+    if (selectedComponent) {
+      setComponents(components.map(c =>
+        c.id === selectedComponent.id ? { ...c, settings: newSettings } : c
+      ));
+      setIsSettingsOpen(false);
+      setSelectedComponent(null);
+    }
   };
 
   const openContentPicker = (component: PageComponent, position: string) => {
@@ -121,15 +131,23 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
   };
 
   const updateComponentContent = (content: Content) => {
-    setComponents(components.map(c =>
-      c.id === selectedComponent?.id ? { ...c, content } : c
-    ));
-    
-    toast({
-      title: "Content Selected",
-      description: `Content '${content.translations[0]?.title || 'Untitled'}' has been added to the component`,
-    });
-    
+    if (selectedComponent) {
+      setComponents(components.map(c =>
+        c.id === selectedComponent.id ? { ...c, content } : c
+      ));
+      
+      toast({
+        title: "Content Selected",
+        description: `Content '${content.translations[0]?.title || 'Untitled'}' has been added to the component`,
+      });
+      
+      setIsContentPickerOpen(false);
+      setSelectedComponent(null);
+      setSelectedPosition(null);
+    }
+  };
+
+  const handleCloseContentPicker = () => {
     setIsContentPickerOpen(false);
     setSelectedComponent(null);
     setSelectedPosition(null);
@@ -149,6 +167,9 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
       <DialogContent className="max-w-7xl max-h-[90vh] p-0">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>Page Builder - {page?.title}</DialogTitle>
+          <DialogDescription>
+            Drag and drop components to build your page layout
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex flex-1 overflow-hidden">
@@ -278,20 +299,25 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
         </DialogFooter>
       </DialogContent>
 
-      {/* Make sure we pass the correct component data to the dialogs */}
-      <ComponentSettingsDialog
-        open={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-        component={selectedComponent as any}
-      />
+      {/* Component Settings Dialog */}
+      {selectedComponent && (
+        <ComponentSettingsDialog
+          open={isSettingsOpen}
+          onOpenChange={setIsSettingsOpen}
+          component={selectedComponent}
+          onSaveSettings={updateComponentSettings}
+        />
+      )}
 
-      <ContentPickerDialog
-        open={isContentPickerOpen}
-        onOpenChange={setIsContentPickerOpen}
-        component={selectedComponent as any}
-        position={selectedPosition}
-        onSelectContent={updateComponentContent}
-      />
+      {/* Content Picker Dialog */}
+      {selectedComponent && (
+        <ContentPickerDialog
+          open={isContentPickerOpen}
+          onOpenChange={handleCloseContentPicker}
+          onSelectContent={updateComponentContent}
+          position={selectedPosition}
+        />
+      )}
     </Dialog>
   );
 };

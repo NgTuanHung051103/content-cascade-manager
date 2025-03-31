@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Layers, 
   Plus, 
@@ -56,6 +56,18 @@ export const Pages = () => {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  // Reset selected page when dialogs close
+  useEffect(() => {
+    if (!isDialogOpen && !isBuilderOpen && !isDeleteDialogOpen) {
+      // Give time for animations to complete before clearing the state
+      const timeout = setTimeout(() => {
+        setSelectedPage(null);
+      }, 300);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isDialogOpen, isBuilderOpen, isDeleteDialogOpen]);
 
   const handleAddPage = () => {
     setSelectedPage(null);
@@ -178,7 +190,7 @@ export const Pages = () => {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="bg-white">
                         <DropdownMenuItem onClick={() => handleEditPage(page)}>
                           <Edit2 className="h-4 w-4 mr-2" />
                           Edit Settings
@@ -213,18 +225,21 @@ export const Pages = () => {
         </CardContent>
       </Card>
 
+      {/* Page Dialog */}
       <PageDialog 
         open={isDialogOpen} 
         onOpenChange={setIsDialogOpen}
         page={selectedPage}
       />
       
+      {/* Page Builder */}
       <PageBuilder
         open={isBuilderOpen}
         onOpenChange={setIsBuilderOpen}
         page={selectedPage}
       />
 
+      {/* Delete Confirmation */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
