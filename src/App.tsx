@@ -14,10 +14,10 @@ import Languages from "./pages/Languages";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
+// Create query client outside of component to avoid re-creation
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Add uuid dependency for ID generation
   useEffect(() => {
     console.log("Content Management System initialized");
   }, []);
@@ -25,8 +25,6 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<DashboardLayout />}>
@@ -41,6 +39,8 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <Toaster />
+        <Sonner />
       </TooltipProvider>
     </QueryClientProvider>
   );
