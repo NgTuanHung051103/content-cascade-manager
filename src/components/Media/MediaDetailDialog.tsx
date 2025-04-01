@@ -26,6 +26,15 @@ interface MediaDetailDialogProps {
 export const MediaDetailDialog = ({ open, onOpenChange, image }: MediaDetailDialogProps) => {
   const isEditing = !!image;
   
+  // Helper function to get the image source, handling both src and path properties
+  const getImageSrc = (img: Image) => img.src || img.path || '';
+  
+  // Helper function to get the image name, handling both name and filename properties
+  const getImageName = (img: Image) => img.name || img.filename || '';
+  
+  // Helper function to get the image type, handling both type and mimetype properties
+  const getImageType = (img: Image) => img.type || img.mimetype || '';
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -43,8 +52,8 @@ export const MediaDetailDialog = ({ open, onOpenChange, image }: MediaDetailDial
             {/* Image Preview */}
             <div className="col-span-2 md:col-span-1">
               <img 
-                src={image.src} 
-                alt={image.name || 'Image'} 
+                src={getImageSrc(image)} 
+                alt={getImageName(image) || 'Image'} 
                 className="w-full rounded-md aspect-video object-cover" 
               />
             </div>
@@ -53,19 +62,19 @@ export const MediaDetailDialog = ({ open, onOpenChange, image }: MediaDetailDial
             <div className="col-span-2 md:col-span-1 space-y-4">
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-600">Filename</h4>
-                <p className="text-gray-800">{image.name}</p>
+                <p className="text-gray-800">{getImageName(image)}</p>
               </div>
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-600">Alt Text</h4>
-                <p className="text-gray-800">{image.name || 'No alt text'}</p>
+                <p className="text-gray-800">{image.alt || getImageName(image) || 'No alt text'}</p>
               </div>
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-600">File Type</h4>
                 <div className="flex items-center space-x-2">
                   <FileType className="h-4 w-4 text-gray-500" />
-                  <p className="text-gray-800">{image.type || 'Unknown'}</p>
+                  <p className="text-gray-800">{getImageType(image) || 'Unknown'}</p>
                 </div>
               </div>
 

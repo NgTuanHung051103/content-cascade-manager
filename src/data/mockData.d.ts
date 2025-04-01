@@ -39,5 +39,9 @@ declare module '@/data/mockData' {
     height: number;
     createdAt: string;
     updatedAt: string;
+    path?: string;
+    filename?: string;
+    mimetype?: string;
+    alt?: string;
   }
 }
