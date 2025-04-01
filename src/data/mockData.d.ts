@@ -27,6 +27,7 @@ declare module '@/data/mockData' {
     updatedAt: string;
     featured_image?: string;
     content_type?: string;
+    isActive?: boolean;
   }
 
   export interface Image {
@@ -43,5 +44,22 @@ declare module '@/data/mockData' {
     filename?: string;
     mimetype?: string;
     alt?: string;
+  }
+  
+  export interface Page {
+    id: string;
+    title: string;
+    slug: string;
+    status: 'draft' | 'published';
+    createdAt: string;
+    updatedAt: string;
+    components?: PageComponent[];
+  }
+  
+  export interface PageComponent {
+    id: string;
+    type: string;
+    contents?: { [key: string]: Content | null };
+    settings?: any;
   }
 }

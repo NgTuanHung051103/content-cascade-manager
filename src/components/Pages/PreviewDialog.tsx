@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Page, Content } from '@/data/mockData';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { TreeBranch } from './TreeBranch';
 
 interface PageComponent {
   id: string;
@@ -381,86 +382,31 @@ export const PreviewDialog = ({
             {/* Tree content structure */}
             <div className={`grid ${alignment === 'right' ? 'justify-items-end' : alignment === 'center' ? 'justify-items-center' : 'justify-items-start'} gap-8`}>
               {Array.from({ length: branchCount }).map((_, i) => {
-                const primaryKey = `primary-${i + 1}`;
+                const branchNumber = i + 1;
+                const primaryKey = `primary-${branchNumber}`;
                 const primaryContent = component.contents?.[primaryKey];
                 const isActive = component.settings?.[`${primaryKey}-active`] !== false;
                 
-                if (!primaryContent) return (
-                  <div key={i} className="text-center text-gray-500 border border-dashed p-4 rounded-lg w-full max-w-md">
-                    <p>Primary Branch {i + 1}</p>
-                    <p className="text-sm">(No content selected)</p>
-                  </div>
-                );
+                // Collect all child contents for this branch
+                const childContents: { [key: string]: Content | null } = {};
+                for (let j = 1; j <= 4; j++) {
+                  const childKey = `${primaryKey}-child-${j}`;
+                  childContents[childKey] = component.contents?.[childKey] || null;
+                }
                 
                 return (
-                  <div key={i} className={cn(
-                    "w-full max-w-md transition-all duration-300",
-                    !isActive ? "opacity-50 grayscale" : "",
-                    animation === "fade" ? "animate-fade-in" : "",
-                    animation === "slide" ? "animate-slide-in-right" : "",
-                    animation === "scale" ? "animate-scale-in" : ""
-                  )}>
-                    <div className={`border rounded-lg overflow-hidden ${!isActive ? 'bg-gray-100' : ''}`}>
-                      <div className="flex p-4 gap-4 items-center">
-                        <div className="w-16 h-16 bg-gray-200 rounded-md flex-shrink-0">
-                          {primaryContent?.featured_image ? (
-                            <img 
-                              src={primaryContent.featured_image} 
-                              alt={primaryContent.translations[0]?.title || ''} 
-                              className="w-full h-full object-cover rounded-md"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center h-full text-gray-400 text-xs">
-                              No img
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <h4 className={`font-medium ${fontSize === 'large' ? 'text-xl' : fontSize === 'small' ? 'text-sm' : 'text-base'}`}>
-                            {primaryContent.translations[0]?.title}
-                          </h4>
-                          <p className={`text-gray-600 ${fontSize === 'large' ? 'text-base' : fontSize === 'small' ? 'text-xs' : 'text-sm'}`}>
-                            {primaryContent.translations[0]?.description?.substring(0, 60)}...
-                          </p>
-                          {isActive && <Button size="sm" variant="outline" className="mt-2">View</Button>}
-                        </div>
-                      </div>
-                      
-                      {isActive && (
-                        <div className="p-2 border-t">
-                          <div className="grid grid-cols-2 gap-2">
-                            {Array.from({ length: 4 }).map((_, j) => {
-                              const childKey = `${primaryKey}-child-${j + 1}`;
-                              const childContent = component.contents?.[childKey];
-                              const isChildActive = component.settings?.[`${childKey}-active`] !== false;
-                              
-                              if (!childContent) return (
-                                <div key={j} className="text-xs text-gray-400 p-2 border rounded">
-                                  Child item {j + 1} (empty)
-                                </div>
-                              );
-                              
-                              return (
-                                <div key={j} className={`flex items-center p-2 border rounded ${!isChildActive ? 'bg-gray-100 opacity-50 grayscale' : ''}`}>
-                                  <ChevronRight className="h-3 w-3 mr-1 flex-shrink-0" />
-                                  <div className="truncate">
-                                    <p className={`font-medium truncate ${fontSize === 'large' ? 'text-sm' : 'text-xs'}`}>
-                                      {childContent.translations[0]?.title}
-                                    </p>
-                                    {isChildActive && fontSize !== 'small' && (
-                                      <p className="text-xs text-gray-500 truncate">
-                                        {childContent.translations[0]?.description?.substring(0, 25)}...
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <TreeBranch
+                    key={i}
+                    branchNumber={branchNumber}
+                    branchContent={primaryContent || null}
+                    childContents={childContents}
+                    isActive={isActive}
+                    settings={component.settings || {}}
+                    onPickContent={() => {}} // Preview doesn't need interactive handlers
+                    onToggleActive={() => {}}
+                    fontSize={fontSize}
+                    animation={animation}
+                  />
                 );
               })}
             </div>

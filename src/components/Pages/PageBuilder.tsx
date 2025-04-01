@@ -29,6 +29,7 @@ import { ComponentSettingsDialog } from './ComponentSettingsDialog';
 import { ContentPickerDialog } from './ContentPickerDialog';
 import { Page, Content } from '@/data/mockData';
 import { PreviewDialog } from './PreviewDialog';
+import { TreeBranchEditor } from './TreeBranchEditor';
 
 interface PageComponent {
   id: string;
@@ -144,7 +145,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
           return { ...c, contents: updatedContents };
         }
         return c;
-      }));
+      });
       
       toast({
         title: "Content Selected",
@@ -220,17 +221,22 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
   
   const addTreeBranch = (component: PageComponent) => {
     const branchKeys = Object.keys(component.contents || {})
-      .filter(key => key.startsWith('primary-'))
-      .map(key => parseInt(key.split('-')[1]));
+      .filter(key => key.startsWith('primary-') && !key.includes('child'))
+      .sort((a, b) => {
+        const numA = parseInt(a.split('-')[1]);
+        const numB = parseInt(b.split('-')[1]);
+        return numA - numB;
+      });
     
-    const currentBranchCount = branchKeys.length > 0 ? Math.max(...branchKeys) : 0;
+    const currentBranchCount = branchKeys.length > 0 
+      ? Math.max(...branchKeys.map(key => parseInt(key.split('-')[1])))
+      : 0;
     const newBranchNumber = currentBranchCount + 1;
     const newBranchKey = `primary-${newBranchNumber}`;
     
     setComponents(components.map(c => {
       if (c.id === component.id) {
         const updatedContents = { ...c.contents };
-        
         updatedContents[newBranchKey] = null;
         
         for (let i = 1; i <= 4; i++) {
@@ -537,7 +543,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
         
       case 'tree':
         const primaryBranchKeys = Object.keys(component.contents || {})
-          .filter(key => key.startsWith('primary-'))
+          .filter(key => key.startsWith('primary-') && !key.includes('child'))
           .sort((a, b) => {
             const numA = parseInt(a.split('-')[1]);
             const numB = parseInt(b.split('-')[1]);
@@ -545,7 +551,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
           });
           
         const branchCount = primaryBranchKeys.length > 0 
-          ? Math.max(...primaryBranchKeys.map(key => parseInt(key.split('-')[1])))
+          ? primaryBranchKeys.length
           : 4;
           
         return (
@@ -596,114 +602,64 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {Array.from({ length: branchCount }).map((_, i) => {
-                  const positionKey = `primary-${i + 1}`;
-                  const isActive = component.settings?.[`${positionKey}-active`] !== false;
-                  
-                  return (
-                    <div key={i} className={`border rounded p-2 ${isActive ? 'bg-gray-50' : 'bg-gray-200'}`}>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm flex items-center">
-                          Branch {i + 1}
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="h-6 w-6 p-0 ml-1"
-                            onClick={() => {
-                              setComponents(components.map(c => {
-                                if (c.id === component.id) {
-                                  const newSettings = { 
-                                    ...c.settings,
-                                    [`${positionKey}-active`]: c.settings?.[`${positionKey}-active`] === false ? undefined : false
-                                  };
-                                  return { ...c, settings: newSettings };
-                                }
-                                return c;
-                              }));
-                            }}
-                          >
-                            <div className={`h-3 w-3 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                          </Button>
-                        </span>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => openContentPicker(component, positionKey)}
-                        >
-                          <Pencil className="w-3 h-3 mr-1" />
-                          Pick
-                        </Button>
-                      </div>
-                      {component.contents?.[positionKey] && (
-                        <div className="mt-2 text-xs p-1 bg-violet-50 rounded border border-violet-100">
-                          Selected: {component.contents[positionKey]?.translations[0]?.title || 'Untitled'}
-                        </div>
-                      )}
-                      
-                      <div className="mt-2 space-y-1">
+                {primaryBranchKeys.length > 0 ? (
+                  primaryBranchKeys.map(key => {
+                    const branchNumber = parseInt(key.split('-')[1]);
+                    const branchContent = component.contents?.[key];
+                    const isActive = component.settings?.[`${key}-active`] !== false;
+                    
+                    const childContents: { [key: string]: Content | null } = {};
+                    for (let j = 1; j <= 4; j++) {
+                      const childKey = `${key}-child-${j}`;
+                      childContents[childKey] = component.contents?.[childKey] || null;
+                    }
+                    
+                    return (
+                      <TreeBranchEditor
+                        key={key}
+                        branchNumber={branchNumber}
+                        branchContent={branchContent || null}
+                        childContents={childContents}
+                        isActive={isActive}
+                        onToggleActive={(toggleKey) => {
+                          setComponents(components.map(c => {
+                            if (c.id === component.id) {
+                              const newSettings = { 
+                                ...c.settings,
+                                [`${toggleKey}-active`]: c.settings?.[`${toggleKey}-active`] === false ? undefined : false
+                              };
+                              return { ...c, settings: newSettings };
+                            }
+                            return c;
+                          }));
+                        }}
+                        onPickContent={(position) => openContentPicker(component, position)}
+                        onPickChildContent={(position) => openContentPicker(component, position)}
+                        onPickAllChildContent={(position) => openContentPicker(component, `${key}-children`, true)}
+                      />
+                    );
+                  })
+                ) : (
+                  Array.from({ length: 4 }).map((_, i) => {
+                    const positionKey = `primary-${i + 1}`;
+                    return (
+                      <div key={i} className="border rounded p-2 bg-gray-50">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs">Sub-items</span>
+                          <span className="text-sm">Branch {i + 1}</span>
                           <Button 
                             variant="outline" 
-                            size="sm"
-                            className="h-6 text-xs px-2"
-                            onClick={() => openContentPicker(component, `${positionKey}-children`, true)}
+                            size="sm" 
+                            onClick={() => openContentPicker(component, positionKey)}
                           >
-                            <Pencil className="w-2 h-2 mr-1" />
-                            Pick All
+                            <Pencil className="w-3 h-3 mr-1" />
+                            Pick
                           </Button>
                         </div>
-                        <div className="grid grid-cols-2 gap-1">
-                          {Array.from({ length: 4 }).map((_, j) => {
-                            const childPositionKey = `${positionKey}-child-${j + 1}`;
-                            const isChildActive = component.settings?.[`${childPositionKey}-active`] !== false;
-                            
-                            return (
-                              <div key={j} className={`border rounded p-1 ${isChildActive ? 'bg-white' : 'bg-gray-200'}`}>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-xs flex items-center">
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm"
-                                      className="h-4 w-4 p-0"
-                                      onClick={() => {
-                                        setComponents(components.map(c => {
-                                          if (c.id === component.id) {
-                                            const newSettings = { 
-                                              ...c.settings,
-                                              [`${childPositionKey}-active`]: c.settings?.[`${childPositionKey}-active`] === false ? undefined : false
-                                            };
-                                            return { ...c, settings: newSettings };
-                                          }
-                                          return c;
-                                        }));
-                                      }}
-                                    >
-                                      <div className={`h-2 w-2 rounded-full ${isChildActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                                    </Button>
-                                  </span>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    className="h-5 text-xs px-1"
-                                    onClick={() => openContentPicker(component, childPositionKey)}
-                                  >
-                                    Pick
-                                  </Button>
-                                </div>
-                                {component.contents?.[childPositionKey] && (
-                                  <div className="mt-1 text-xs p-1 bg-violet-50 rounded border border-violet-100 text-[10px] truncate">
-                                    {component.contents[childPositionKey]?.translations[0]?.title || 'Untitled'}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+                        <div className="text-xs text-gray-500 p-1">No content selected</div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
