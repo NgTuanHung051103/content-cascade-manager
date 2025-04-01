@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Dialog, 
@@ -320,7 +319,7 @@ export const PreviewDialog = ({
         
         // Find all primary branches by checking for keys that start with "primary-"
         const primaryBranchKeys = Object.keys(component.contents || {})
-          .filter(key => key.startsWith('primary-'))
+          .filter(key => key.startsWith('primary-') && !key.includes('child'))
           .sort((a, b) => {
             const numA = parseInt(a.split('-')[1]);
             const numB = parseInt(b.split('-')[1]);
@@ -329,7 +328,7 @@ export const PreviewDialog = ({
           
         // If there are no branches yet, use default 4
         const branchCount = primaryBranchKeys.length > 0 
-          ? Math.max(...primaryBranchKeys.map(key => parseInt(key.split('-')[1])))
+          ? primaryBranchKeys.length
           : 4;
         
         return (

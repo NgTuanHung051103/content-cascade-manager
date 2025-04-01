@@ -229,6 +229,14 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     
     setComponents(components.map(c => {
       if (c.id === component.id) {
+        const updatedContents = { ...c.contents };
+        
+        updatedContents[newBranchKey] = null;
+        
+        for (let i = 1; i <= 4; i++) {
+          updatedContents[`${newBranchKey}-child-${i}`] = null;
+        }
+        
         const updatedSettings = { ...c.settings };
         updatedSettings[`${newBranchKey}-active`] = true;
         
@@ -238,6 +246,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
         
         return {
           ...c,
+          contents: updatedContents,
           settings: updatedSettings
         };
       }
