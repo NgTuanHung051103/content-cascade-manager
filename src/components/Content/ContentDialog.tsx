@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Dialog, 
@@ -64,11 +63,12 @@ export const ContentDialog = ({ open, onOpenChange, content }: ContentDialogProp
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select defaultValue={content?.categoryId || ""}>
+                <Select defaultValue={content?.categoryId || "none"}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">No Category</SelectItem>
                     {categories.map(cat => {
                       const name = cat.translations.find(t => t.languageId === 'lang-1')?.name || cat.id;
                       return (

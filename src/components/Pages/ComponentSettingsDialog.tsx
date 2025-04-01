@@ -234,7 +234,6 @@ export const ComponentSettingsDialog = ({
                                   <Switch 
                                     id={`${childKey}-active`} 
                                     checked={settings[`${childKey}-active`] !== false}
-                                    size="sm"
                                     onCheckedChange={(checked) => handleChange(`${childKey}-active`, checked)}
                                   />
                                 </div>
@@ -349,14 +348,14 @@ export const ComponentSettingsDialog = ({
               <div className="space-y-2">
                 <Label htmlFor="animation">Animation Style</Label>
                 <Select 
-                  value={settings.animation || ''} 
+                  value={settings.animation || 'none'} 
                   onValueChange={(value) => handleChange('animation', value)}
                 >
                   <SelectTrigger id="animation">
                     <SelectValue placeholder="Select animation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="fade">Fade In</SelectItem>
                     <SelectItem value="slide">Slide In</SelectItem>
                     <SelectItem value="scale">Scale In</SelectItem>

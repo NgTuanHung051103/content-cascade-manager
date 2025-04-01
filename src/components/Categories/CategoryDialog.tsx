@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Dialog, 
@@ -52,12 +51,12 @@ export const CategoryDialog = ({ open, onOpenChange, category }: CategoryDialogP
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="parent">Parent Category</Label>
-            <Select defaultValue={category?.parentId || ""}>
+            <Select defaultValue={category?.parentId || "none"}>
               <SelectTrigger>
                 <SelectValue placeholder="Select parent category (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No Parent</SelectItem>
+                <SelectItem value="none">No Parent</SelectItem>
                 {categories.map(cat => {
                   const name = cat.translations.find(t => t.languageId === 'lang-1')?.name || cat.id;
                   return (
