@@ -172,6 +172,84 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     setIsPreviewOpen(true);
   };
 
+  const addFeaturedItem = (component: PageComponent) => {
+    const currentColumns = component.settings?.columns || 3;
+    const newColumns = currentColumns + 1;
+    
+    setComponents(components.map(c => {
+      if (c.id === component.id) {
+        return {
+          ...c,
+          settings: {
+            ...c.settings,
+            columns: newColumns
+          }
+        };
+      }
+      return c;
+    }));
+    
+    toast({
+      title: "Item Added",
+      description: `A new featured content item has been added.`,
+    });
+  };
+  
+  const addGridRow = (component: PageComponent) => {
+    const currentRows = component.settings?.rows || 2;
+    const newRows = currentRows + 1;
+    
+    setComponents(components.map(c => {
+      if (c.id === component.id) {
+        return {
+          ...c,
+          settings: {
+            ...c.settings,
+            rows: newRows
+          }
+        };
+      }
+      return c;
+    }));
+    
+    toast({
+      title: "Row Added",
+      description: `A new row has been added to the grid.`,
+    });
+  };
+  
+  const addTreeBranch = (component: PageComponent) => {
+    const branchKeys = Object.keys(component.contents || {})
+      .filter(key => key.startsWith('primary-'))
+      .map(key => parseInt(key.split('-')[1]));
+    
+    const currentBranchCount = branchKeys.length > 0 ? Math.max(...branchKeys) : 0;
+    const newBranchNumber = currentBranchCount + 1;
+    const newBranchKey = `primary-${newBranchNumber}`;
+    
+    setComponents(components.map(c => {
+      if (c.id === component.id) {
+        const updatedSettings = { ...c.settings };
+        updatedSettings[`${newBranchKey}-active`] = true;
+        
+        for (let i = 1; i <= 4; i++) {
+          updatedSettings[`${newBranchKey}-child-${i}-active`] = true;
+        }
+        
+        return {
+          ...c,
+          settings: updatedSettings
+        };
+      }
+      return c;
+    }));
+    
+    toast({
+      title: "Branch Added",
+      description: `A new branch with sub-items has been added to the tree.`,
+    });
+  };
+
   const renderComponentContentSection = (component: PageComponent) => {
     switch(component.type) {
       case 'hero':
@@ -198,21 +276,33 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
         );
         
       case 'featured':
+        const featuredColumns = component.settings?.columns || 3;
+        
         return (
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <div className="text-sm font-medium">Content Items (Featured)</div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => openContentPicker(component, 'featured', true)}
-              >
-                <Pencil className="w-3 h-3 mr-1" />
-                Pick Multiple
-              </Button>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => openContentPicker(component, 'featured', true)}
+                >
+                  <Pencil className="w-3 h-3 mr-1" />
+                  Pick Multiple
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => addFeaturedItem(component)}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Add Item
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {Array.from({ length: component.settings?.columns || 3 }).map((_, i) => {
+              {Array.from({ length: featuredColumns }).map((_, i) => {
                 const positionKey = `featured-${i + 1}`;
                 return (
                   <div key={i} className="border rounded p-2 bg-gray-50">
@@ -248,14 +338,24 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <div className="text-sm font-medium">Content Grid ({gridColumns}×{gridRows})</div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => openContentPicker(component, 'grid', true)}
-              >
-                <Pencil className="w-3 h-3 mr-1" />
-                Pick Multiple
-              </Button>
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => openContentPicker(component, 'grid', true)}
+                >
+                  <Pencil className="w-3 h-3 mr-1" />
+                  Pick Multiple
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => addGridRow(component)}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Add Row
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {Array.from({ length: totalCells }).map((_, i) => {
@@ -315,17 +415,34 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="text-sm font-medium">Secondary Content (4 items)</div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => openContentPicker(component, 'secondary', true)}
-                >
-                  <Pencil className="w-3 h-3 mr-1" />
-                  Pick Multiple
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => openContentPicker(component, 'secondary', true)}
+                  >
+                    <Pencil className="w-3 h-3 mr-1" />
+                    Pick Multiple
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      const updatedSettings = { ...component.settings, secondaryCount: (component.settings?.secondaryCount || 4) + 2 };
+                      setComponents(components.map(c => c.id === component.id ? { ...c, settings: updatedSettings } : c));
+                      toast({
+                        title: "Items Added",
+                        description: "Added 2 more secondary content items.",
+                      });
+                    }}
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Add More
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {Array.from({ length: 4 }).map((_, i) => {
+                {Array.from({ length: component.settings?.secondaryCount || 4 }).map((_, i) => {
                   const positionKey = `secondary-${i + 1}`;
                   return (
                     <div key={i} className="border rounded p-2 bg-gray-50">
@@ -354,17 +471,34 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="text-sm font-medium">Tertiary Content (4 items)</div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => openContentPicker(component, 'tertiary', true)}
-                >
-                  <Pencil className="w-3 h-3 mr-1" />
-                  Pick Multiple
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => openContentPicker(component, 'tertiary', true)}
+                  >
+                    <Pencil className="w-3 h-3 mr-1" />
+                    Pick Multiple
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      const updatedSettings = { ...component.settings, tertiaryCount: (component.settings?.tertiaryCount || 4) + 2 };
+                      setComponents(components.map(c => c.id === component.id ? { ...c, settings: updatedSettings } : c));
+                      toast({
+                        title: "Items Added",
+                        description: "Added 2 more tertiary content items.",
+                      });
+                    }}
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Add More
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {Array.from({ length: 4 }).map((_, i) => {
+                {Array.from({ length: component.settings?.tertiaryCount || 4 }).map((_, i) => {
                   const positionKey = `tertiary-${i + 1}`;
                   return (
                     <div key={i} className="border rounded p-2 bg-gray-50">
@@ -393,6 +527,18 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
         );
         
       case 'tree':
+        const primaryBranchKeys = Object.keys(component.contents || {})
+          .filter(key => key.startsWith('primary-'))
+          .sort((a, b) => {
+            const numA = parseInt(a.split('-')[1]);
+            const numB = parseInt(b.split('-')[1]);
+            return numA - numB;
+          });
+          
+        const branchCount = primaryBranchKeys.length > 0 
+          ? Math.max(...primaryBranchKeys.map(key => parseInt(key.split('-')[1])))
+          : 4;
+          
         return (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -420,18 +566,28 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
             
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <div className="text-sm font-medium">Primary Branches (4 items)</div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => openContentPicker(component, 'primary', true)}
-                >
-                  <Pencil className="w-3 h-3 mr-1" />
-                  Pick Multiple
-                </Button>
+                <div className="text-sm font-medium">Primary Branches ({branchCount} items)</div>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => openContentPicker(component, 'primary', true)}
+                  >
+                    <Pencil className="w-3 h-3 mr-1" />
+                    Pick Multiple
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => addTreeBranch(component)}
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Add Branch
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {Array.from({ length: 4 }).map((_, i) => {
+                {Array.from({ length: branchCount }).map((_, i) => {
                   const positionKey = `primary-${i + 1}`;
                   const isActive = component.settings?.[`${positionKey}-active`] !== false;
                   

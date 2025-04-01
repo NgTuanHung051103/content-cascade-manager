@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Dialog, 
@@ -88,7 +89,7 @@ export const PreviewDialog = ({
         return (
           <div className="py-8 px-4 max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center">Featured Content</h2>
-            <div className={`grid grid-cols-1 md:grid-cols-${featuredColumns} gap-6`}>
+            <div className={`grid grid-cols-1 md:grid-cols-${Math.min(featuredColumns, 4)} gap-6`}>
               {Array.from({ length: featuredColumns }).map((_, i) => {
                 const positionKey = `featured-${i + 1}`;
                 const featuredContent = component.contents?.[positionKey];
@@ -139,7 +140,7 @@ export const PreviewDialog = ({
         return (
           <div className="py-8 px-4 max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center">Content Grid</h2>
-            <div className={`grid grid-cols-2 md:grid-cols-${gridColumns} gap-4`}>
+            <div className={`grid grid-cols-2 md:grid-cols-${Math.min(gridColumns, 4)} gap-4`}>
               {Array.from({ length: totalCells }).map((_, i) => {
                 const positionKey = `grid-${i + 1}`;
                 const gridContent = component.contents?.[positionKey];
@@ -180,6 +181,9 @@ export const PreviewDialog = ({
         );
         
       case 'hierarchy':
+        const secondaryCount = component.settings?.secondaryCount || 4;
+        const tertiaryCount = component.settings?.tertiaryCount || 4;
+        
         return (
           <div className="py-8 px-4 max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center">Hierarchy Content</h2>
@@ -222,7 +226,7 @@ export const PreviewDialog = ({
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-3">Secondary Content</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => {
+                {Array.from({ length: secondaryCount }).map((_, i) => {
                   const positionKey = `secondary-${i + 1}`;
                   const secondaryContent = component.contents?.[positionKey];
                   
@@ -264,7 +268,7 @@ export const PreviewDialog = ({
             <div>
               <h3 className="text-lg font-semibold mb-3">Tertiary Content</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => {
+                {Array.from({ length: tertiaryCount }).map((_, i) => {
                   const positionKey = `tertiary-${i + 1}`;
                   const tertiaryContent = component.contents?.[positionKey];
                   
@@ -313,6 +317,20 @@ export const PreviewDialog = ({
         const textAlign = component.settings?.textAlign || 'text-left';
         const animation = component.settings?.animation || '';
         const alignment = component.settings?.contentAlignment || 'left';
+        
+        // Find all primary branches by checking for keys that start with "primary-"
+        const primaryBranchKeys = Object.keys(component.contents || {})
+          .filter(key => key.startsWith('primary-'))
+          .sort((a, b) => {
+            const numA = parseInt(a.split('-')[1]);
+            const numB = parseInt(b.split('-')[1]);
+            return numA - numB;
+          });
+          
+        // If there are no branches yet, use default 4
+        const branchCount = primaryBranchKeys.length > 0 
+          ? Math.max(...primaryBranchKeys.map(key => parseInt(key.split('-')[1])))
+          : 4;
         
         return (
           <div className={`py-8 px-4 max-w-6xl mx-auto ${bgColor} ${textColor} ${animation}`}>
@@ -363,7 +381,7 @@ export const PreviewDialog = ({
             
             {/* Tree content structure */}
             <div className={`grid ${alignment === 'right' ? 'justify-items-end' : alignment === 'center' ? 'justify-items-center' : 'justify-items-start'} gap-8`}>
-              {Array.from({ length: 4 }).map((_, i) => {
+              {Array.from({ length: branchCount }).map((_, i) => {
                 const primaryKey = `primary-${i + 1}`;
                 const primaryContent = component.contents?.[primaryKey];
                 const isActive = component.settings?.[`${primaryKey}-active`] !== false;
