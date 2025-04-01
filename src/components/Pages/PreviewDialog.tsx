@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Dialog, 
@@ -8,10 +7,11 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { X, ExternalLink } from 'lucide-react';
+import { X, ExternalLink, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Page, Content } from '@/data/mockData';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface PageComponent {
   id: string;
@@ -302,6 +302,150 @@ export const PreviewDialog = ({
                   );
                 })}
               </div>
+            </div>
+          </div>
+        );
+        
+      case 'tree':
+        const bgColor = component.settings?.backgroundColor || 'bg-white';
+        const textColor = component.settings?.textColor || 'text-gray-900';
+        const fontSize = component.settings?.fontSize || 'text-base';
+        const textAlign = component.settings?.textAlign || 'text-left';
+        const animation = component.settings?.animation || '';
+        const alignment = component.settings?.contentAlignment || 'left';
+        
+        return (
+          <div className={`py-8 px-4 max-w-6xl mx-auto ${bgColor} ${textColor} ${animation}`}>
+            <h2 className="text-2xl font-bold mb-6 text-center">Tree Content Structure</h2>
+            
+            {/* Main content */}
+            <div className="mb-8">
+              {component.contents?.main ? (
+                <div className={`border rounded-lg overflow-hidden ${cn(
+                  "transition-all duration-300",
+                  animation === "fade" ? "animate-fade-in" : "",
+                  animation === "slide" ? "animate-slide-in-right" : "",
+                  animation === "scale" ? "animate-scale-in" : ""
+                )}`}>
+                  <div className="aspect-video bg-gray-200">
+                    {component.contents.main?.featured_image ? (
+                      <img 
+                        src={component.contents.main.featured_image} 
+                        alt={component.contents.main.translations[0]?.title || ''} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        No image
+                      </div>
+                    )}
+                  </div>
+                  <div className={`p-6 ${textAlign}`}>
+                    {component.contents.main?.content_type && (
+                      <Badge className="mb-2">{component.contents.main.content_type}</Badge>
+                    )}
+                    <h3 className={`${fontSize === 'large' ? 'text-3xl' : fontSize === 'small' ? 'text-xl' : 'text-2xl'} font-bold mb-2`}>
+                      {component.contents.main.translations[0]?.title}
+                    </h3>
+                    <p className={`text-gray-600 mb-4 ${fontSize === 'large' ? 'text-lg' : fontSize === 'small' ? 'text-sm' : 'text-base'}`}>
+                      {component.contents.main.translations[0]?.description}
+                    </p>
+                    <Button>Read More</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 border border-dashed p-10 rounded-lg">
+                  <p>Main Content</p>
+                  <p className="text-sm">(No content selected)</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Tree content structure */}
+            <div className={`grid ${alignment === 'right' ? 'justify-items-end' : alignment === 'center' ? 'justify-items-center' : 'justify-items-start'} gap-8`}>
+              {Array.from({ length: 4 }).map((_, i) => {
+                const primaryKey = `primary-${i + 1}`;
+                const primaryContent = component.contents?.[primaryKey];
+                const isActive = component.settings?.[`${primaryKey}-active`] !== false;
+                
+                if (!primaryContent) return (
+                  <div key={i} className="text-center text-gray-500 border border-dashed p-4 rounded-lg w-full max-w-md">
+                    <p>Primary Branch {i + 1}</p>
+                    <p className="text-sm">(No content selected)</p>
+                  </div>
+                );
+                
+                return (
+                  <div key={i} className={cn(
+                    "w-full max-w-md transition-all duration-300",
+                    !isActive ? "opacity-50 grayscale" : "",
+                    animation === "fade" ? "animate-fade-in" : "",
+                    animation === "slide" ? "animate-slide-in-right" : "",
+                    animation === "scale" ? "animate-scale-in" : ""
+                  )}>
+                    <div className={`border rounded-lg overflow-hidden ${!isActive ? 'bg-gray-100' : ''}`}>
+                      <div className="flex p-4 gap-4 items-center">
+                        <div className="w-16 h-16 bg-gray-200 rounded-md flex-shrink-0">
+                          {primaryContent?.featured_image ? (
+                            <img 
+                              src={primaryContent.featured_image} 
+                              alt={primaryContent.translations[0]?.title || ''} 
+                              className="w-full h-full object-cover rounded-md"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                              No img
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h4 className={`font-medium ${fontSize === 'large' ? 'text-xl' : fontSize === 'small' ? 'text-sm' : 'text-base'}`}>
+                            {primaryContent.translations[0]?.title}
+                          </h4>
+                          <p className={`text-gray-600 ${fontSize === 'large' ? 'text-base' : fontSize === 'small' ? 'text-xs' : 'text-sm'}`}>
+                            {primaryContent.translations[0]?.description?.substring(0, 60)}...
+                          </p>
+                          {isActive && <Button size="sm" variant="outline" className="mt-2">View</Button>}
+                        </div>
+                      </div>
+                      
+                      {isActive && (
+                        <div className="p-2 border-t">
+                          <div className="grid grid-cols-2 gap-2">
+                            {Array.from({ length: 4 }).map((_, j) => {
+                              const childKey = `${primaryKey}-child-${j + 1}`;
+                              const childContent = component.contents?.[childKey];
+                              const isChildActive = component.settings?.[`${childKey}-active`] !== false;
+                              
+                              if (!childContent) return (
+                                <div key={j} className="text-xs text-gray-400 p-2 border rounded">
+                                  Child item {j + 1} (empty)
+                                </div>
+                              );
+                              
+                              return (
+                                <div key={j} className={`flex items-center p-2 border rounded ${!isChildActive ? 'bg-gray-100 opacity-50 grayscale' : ''}`}>
+                                  <ChevronRight className="h-3 w-3 mr-1 flex-shrink-0" />
+                                  <div className="truncate">
+                                    <p className={`font-medium truncate ${fontSize === 'large' ? 'text-sm' : 'text-xs'}`}>
+                                      {childContent.translations[0]?.title}
+                                    </p>
+                                    {isChildActive && fontSize !== 'small' && (
+                                      <p className="text-xs text-gray-500 truncate">
+                                        {childContent.translations[0]?.description?.substring(0, 25)}...
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
