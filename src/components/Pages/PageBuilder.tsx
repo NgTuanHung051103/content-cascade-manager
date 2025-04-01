@@ -22,17 +22,19 @@ import {
   Plus,
   LayoutGrid,
   Save,
-  X
+  X,
+  Eye
 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import { ComponentSettingsDialog } from './ComponentSettingsDialog';
 import { ContentPickerDialog } from './ContentPickerDialog';
 import { Page, Content } from '@/data/mockData';
+import { PreviewDialog } from './PreviewDialog';
 
 interface PageComponent {
   id: string;
   type: string;
-  content?: Content | null;
+  contents?: { [key: string]: Content | null };
   settings?: any;
 }
 
@@ -44,6 +46,7 @@ const availableComponents = [
   { type: 'hero', label: 'Hero Banner' },
   { type: 'featured', label: 'Featured Content' },
   { type: 'grid', label: 'Content Grid' },
+  { type: 'hierarchy', label: 'Hierarchy Content' },
 ];
 
 const reorder = (list: any[], startIndex: number, endIndex: number) => {
@@ -65,7 +68,9 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
   const [selectedComponent, setSelectedComponent] = useState<PageComponent | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isContentPickerOpen, setIsContentPickerOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<string | null>(null);
+  const [isMultiSelectContent, setIsMultiSelectContent] = useState(false);
 
   // Reset and load components when page changes or dialog opens
   useEffect(() => {
@@ -75,7 +80,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
           id: comp.id,
           type: comp.type,
           settings: comp.settings || {},
-          content: comp.content || null
+          contents: comp.contents || {}
         })) || []
       );
     }
@@ -99,7 +104,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     const newComponent: PageComponent = {
       id: `component-${Date.now()}`,
       type: type,
-      content: null,
+      contents: {},
       settings: {},
     };
     setComponents([...components, newComponent]);
@@ -124,26 +129,28 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     }
   };
 
-  const openContentPicker = (component: PageComponent, position: string) => {
+  const openContentPicker = (component: PageComponent, position: string, multiSelect: boolean = false) => {
     setSelectedComponent(component);
     setSelectedPosition(position);
+    setIsMultiSelectContent(multiSelect);
     setIsContentPickerOpen(true);
   };
 
-  const updateComponentContent = (content: Content) => {
-    if (selectedComponent) {
-      setComponents(components.map(c =>
-        c.id === selectedComponent.id ? { ...c, content } : c
-      ));
+  const updateComponentContent = (content: Content, position: string | null) => {
+    if (selectedComponent && position) {
+      setComponents(components.map(c => {
+        if (c.id === selectedComponent.id) {
+          const updatedContents = { ...c.contents };
+          updatedContents[position] = content;
+          return { ...c, contents: updatedContents };
+        }
+        return c;
+      }));
       
       toast({
         title: "Content Selected",
         description: `Content '${content.translations[0]?.title || 'Untitled'}' has been added to the component`,
       });
-      
-      setIsContentPickerOpen(false);
-      setSelectedComponent(null);
-      setSelectedPosition(null);
     }
   };
 
@@ -151,6 +158,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     setIsContentPickerOpen(false);
     setSelectedComponent(null);
     setSelectedPosition(null);
+    setIsMultiSelectContent(false);
   };
 
   const handleSave = () => {
@@ -160,6 +168,239 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
       description: `Page layout has been updated successfully`,
     });
     onOpenChange(false);
+  };
+
+  const openPreview = () => {
+    setIsPreviewOpen(true);
+  };
+
+  const renderComponentContentSection = (component: PageComponent) => {
+    switch(component.type) {
+      case 'hero':
+      case 'text':
+        return (
+          <div className="border rounded p-2 bg-gray-50">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Main Content</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => openContentPicker(component, 'main')}
+              >
+                <Pencil className="w-3 h-3 mr-1" />
+                Pick Content
+              </Button>
+            </div>
+            {component.contents?.main && (
+              <div className="mt-2 text-xs p-1 bg-violet-50 rounded border border-violet-100">
+                Selected: {component.contents.main.translations[0]?.title || 'Untitled'}
+              </div>
+            )}
+          </div>
+        );
+        
+      case 'featured':
+        return (
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="text-sm font-medium">Content Items (Featured)</div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => openContentPicker(component, 'featured', true)}
+              >
+                <Pencil className="w-3 h-3 mr-1" />
+                Pick Multiple
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {Array.from({ length: component.settings?.columns || 3 }).map((_, i) => {
+                const positionKey = `featured-${i + 1}`;
+                return (
+                  <div key={i} className="border rounded p-2 bg-gray-50">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Item {i + 1}</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => openContentPicker(component, positionKey)}
+                      >
+                        <Pencil className="w-3 h-3 mr-1" />
+                        Pick
+                      </Button>
+                    </div>
+                    {component.contents?.[positionKey] && (
+                      <div className="mt-2 text-xs p-1 bg-violet-50 rounded border border-violet-100">
+                        Selected: {component.contents[positionKey]?.translations[0]?.title || 'Untitled'}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+        
+      case 'grid':
+        const gridColumns = component.settings?.columns || 4;
+        const gridRows = component.settings?.rows || 2;
+        const totalCells = gridColumns * gridRows;
+        
+        return (
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="text-sm font-medium">Content Grid ({gridColumns}×{gridRows})</div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => openContentPicker(component, 'grid', true)}
+              >
+                <Pencil className="w-3 h-3 mr-1" />
+                Pick Multiple
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {Array.from({ length: totalCells }).map((_, i) => {
+                const positionKey = `grid-${i + 1}`;
+                return (
+                  <div key={i} className="border rounded p-2 bg-gray-50">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-xs">Item {i + 1}</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-7 text-xs px-2" 
+                        onClick={() => openContentPicker(component, positionKey)}
+                      >
+                        <Pencil className="w-3 h-3 mr-1" />
+                        Pick
+                      </Button>
+                    </div>
+                    {component.contents?.[positionKey] && (
+                      <div className="mt-1 text-xs p-1 bg-violet-50 rounded border border-violet-100 truncate">
+                        {component.contents[positionKey]?.translations[0]?.title || 'Untitled'}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      case 'hierarchy':
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="text-sm font-medium">Main Content</div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => openContentPicker(component, 'main')}
+                >
+                  <Pencil className="w-3 h-3 mr-1" />
+                  Pick Content
+                </Button>
+              </div>
+              <div className="border rounded p-2 bg-gray-50">
+                {component.contents?.main ? (
+                  <div className="text-xs p-1 bg-violet-50 rounded border border-violet-100">
+                    Selected: {component.contents.main.translations[0]?.title || 'Untitled'}
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-500 p-1">No content selected</div>
+                )}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="text-sm font-medium">Secondary Content (4 items)</div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => openContentPicker(component, 'secondary', true)}
+                >
+                  <Pencil className="w-3 h-3 mr-1" />
+                  Pick Multiple
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {Array.from({ length: 4 }).map((_, i) => {
+                  const positionKey = `secondary-${i + 1}`;
+                  return (
+                    <div key={i} className="border rounded p-2 bg-gray-50">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Item {i + 1}</span>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => openContentPicker(component, positionKey)}
+                        >
+                          <Pencil className="w-3 h-3 mr-1" />
+                          Pick
+                        </Button>
+                      </div>
+                      {component.contents?.[positionKey] && (
+                        <div className="mt-2 text-xs p-1 bg-violet-50 rounded border border-violet-100">
+                          Selected: {component.contents[positionKey]?.translations[0]?.title || 'Untitled'}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="text-sm font-medium">Tertiary Content (4 items)</div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => openContentPicker(component, 'tertiary', true)}
+                >
+                  <Pencil className="w-3 h-3 mr-1" />
+                  Pick Multiple
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {Array.from({ length: 4 }).map((_, i) => {
+                  const positionKey = `tertiary-${i + 1}`;
+                  return (
+                    <div key={i} className="border rounded p-2 bg-gray-50">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Item {i + 1}</span>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => openContentPicker(component, positionKey)}
+                        >
+                          <Pencil className="w-3 h-3 mr-1" />
+                          Pick
+                        </Button>
+                      </div>
+                      {component.contents?.[positionKey] && (
+                        <div className="mt-2 text-xs p-1 bg-violet-50 rounded border border-violet-100">
+                          Selected: {component.contents[positionKey]?.translations[0]?.title || 'Untitled'}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+        
+      default:
+        return (
+          <div className="p-2 bg-gray-50 rounded text-sm text-gray-500">
+            No content configuration needed for this component type
+          </div>
+        );
+    }
   };
 
   return (
@@ -188,8 +429,14 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
           </div>
 
           <div className="flex-1 p-4 overflow-auto">
-            <h3 className="text-lg font-semibold mb-2">Page Structure</h3>
-            <ScrollArea className="h-[calc(80vh-80px)]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Page Structure</h3>
+              <Button variant="outline" onClick={openPreview}>
+                <Eye className="w-4 h-4 mr-2" />
+                Preview
+              </Button>
+            </div>
+            <ScrollArea className="h-[calc(80vh-100px)]">
               <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="droppable">
                   {(provided) => (
@@ -230,49 +477,7 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
                               </div>
                               
                               <div className="space-y-2">
-                                {(component.type === 'hero' || component.type === 'text') && (
-                                  <div className="border rounded p-2 bg-gray-50">
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-sm">Main Content</span>
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        onClick={() => openContentPicker(component, 'main')}
-                                      >
-                                        <Pencil className="w-3 h-3 mr-1" />
-                                        Pick Content
-                                      </Button>
-                                    </div>
-                                    {component.content && (
-                                      <div className="mt-2 text-xs p-1 bg-violet-50 rounded border border-violet-100">
-                                        Selected: {component.content.translations[0]?.title || 'Untitled'}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                                
-                                {(component.type === 'featured' || component.type === 'grid') && (
-                                  <div className="space-y-2">
-                                    <div className="text-sm font-medium">Content Items</div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      {Array.from({ length: component.type === 'featured' ? 3 : 4 }).map((_, i) => (
-                                        <div key={i} className="border rounded p-2 bg-gray-50">
-                                          <div className="flex justify-between items-center">
-                                            <span className="text-sm">Item {i + 1}</span>
-                                            <Button 
-                                              variant="outline" 
-                                              size="sm" 
-                                              onClick={() => openContentPicker(component, `item-${i + 1}`)}
-                                            >
-                                              <Pencil className="w-3 h-3 mr-1" />
-                                              Pick
-                                            </Button>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
+                                {renderComponentContentSection(component)}
                               </div>
                             </div>
                           )}
@@ -316,8 +521,17 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
           onOpenChange={handleCloseContentPicker}
           onSelectContent={updateComponentContent}
           position={selectedPosition}
+          multiSelect={isMultiSelectContent}
         />
       )}
+
+      {/* Preview Dialog */}
+      <PreviewDialog 
+        open={isPreviewOpen} 
+        onOpenChange={setIsPreviewOpen}
+        page={page}
+        components={components}
+      />
     </Dialog>
   );
 };

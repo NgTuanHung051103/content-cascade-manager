@@ -29,9 +29,9 @@ interface PageDialogProps {
 
 export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
   const isEditing = !!page;
-  const [title, setTitle] = useState(page?.title || '');
-  const [slug, setSlug] = useState(page?.slug || '');
-  const [status, setStatus] = useState<'draft' | 'published'>(page?.status || 'draft');
+  const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
+  const [status, setStatus] = useState<'draft' | 'published'>('draft');
 
   // Reset form when dialog opens with new page data
   useEffect(() => {
