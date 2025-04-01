@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Dialog, 
@@ -42,8 +43,8 @@ export const MediaDetailDialog = ({ open, onOpenChange, image }: MediaDetailDial
             {/* Image Preview */}
             <div className="col-span-2 md:col-span-1">
               <img 
-                src={image.url} 
-                alt={image.altText} 
+                src={image.src} 
+                alt={image.name || 'Image'} 
                 className="w-full rounded-md aspect-video object-cover" 
               />
             </div>
@@ -52,32 +53,32 @@ export const MediaDetailDialog = ({ open, onOpenChange, image }: MediaDetailDial
             <div className="col-span-2 md:col-span-1 space-y-4">
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-600">Filename</h4>
-                <p className="text-gray-800">{image.filename}</p>
+                <p className="text-gray-800">{image.name}</p>
               </div>
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-600">Alt Text</h4>
-                <p className="text-gray-800">{image.altText}</p>
+                <p className="text-gray-800">{image.name || 'No alt text'}</p>
               </div>
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-600">File Type</h4>
                 <div className="flex items-center space-x-2">
                   <FileType className="h-4 w-4 text-gray-500" />
-                  <p className="text-gray-800">{image.fileType}</p>
+                  <p className="text-gray-800">{image.type || 'Unknown'}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-600">File Size</h4>
-                <p className="text-gray-800">{image.fileSize}</p>
+                <p className="text-gray-800">{image.size ? `${Math.round(image.size / 1024)} KB` : 'Unknown'}</p>
               </div>
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-600">Dimensions</h4>
                 <div className="flex items-center space-x-2">
                   <LayoutGrid className="h-4 w-4 text-gray-500" />
-                  <p className="text-gray-800">{image.width} x {image.height}</p>
+                  <p className="text-gray-800">{image.width || '?'} x {image.height || '?'}</p>
                 </div>
               </div>
 
@@ -85,7 +86,7 @@ export const MediaDetailDialog = ({ open, onOpenChange, image }: MediaDetailDial
                 <h4 className="text-sm font-medium text-gray-600">Uploaded By</h4>
                 <div className="flex items-center space-x-2">
                   <User className="h-4 w-4 text-gray-500" />
-                  <p className="text-gray-800">{image.uploadedBy}</p>
+                  <p className="text-gray-800">Admin</p>
                 </div>
               </div>
 
@@ -93,7 +94,7 @@ export const MediaDetailDialog = ({ open, onOpenChange, image }: MediaDetailDial
                 <h4 className="text-sm font-medium text-gray-600">Uploaded On</h4>
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4 text-gray-500" />
-                  <p className="text-gray-800">{new Date(image.uploadedOn).toLocaleDateString()}</p>
+                  <p className="text-gray-800">{image.createdAt ? new Date(image.createdAt).toLocaleDateString() : 'Unknown'}</p>
                 </div>
               </div>
             </div>

@@ -97,9 +97,9 @@ export const PreviewDialog = ({
                   <div key={i} className="rounded-lg border overflow-hidden">
                     {component.settings?.showImage !== false && (
                       <div className="aspect-video bg-gray-200">
-                        {featuredContent?.featuredImage ? (
+                        {featuredContent?.featured_image ? (
                           <img 
-                            src={featuredContent.featuredImage} 
+                            src={featuredContent.featured_image} 
                             alt={featuredContent.translations[0]?.title || ''} 
                             className="w-full h-full object-cover"
                           />
@@ -147,9 +147,9 @@ export const PreviewDialog = ({
                 return (
                   <div key={i} className="border rounded-md overflow-hidden">
                     <div className="aspect-video bg-gray-200">
-                      {gridContent?.featuredImage ? (
+                      {gridContent?.featured_image ? (
                         <img 
-                          src={gridContent.featuredImage} 
+                          src={gridContent.featured_image} 
                           alt={gridContent.translations[0]?.title || ''} 
                           className="w-full h-full object-cover"
                         />
@@ -189,9 +189,9 @@ export const PreviewDialog = ({
               {component.contents?.main ? (
                 <div className="border rounded-lg overflow-hidden">
                   <div className="aspect-video bg-gray-200">
-                    {component.contents.main.featuredImage ? (
+                    {component.contents.main.featured_image ? (
                       <img 
-                        src={component.contents.main.featuredImage} 
+                        src={component.contents.main.featured_image} 
                         alt={component.contents.main.translations[0]?.title || ''} 
                         className="w-full h-full object-cover"
                       />
@@ -202,8 +202,8 @@ export const PreviewDialog = ({
                     )}
                   </div>
                   <div className="p-6">
-                    {component.contents.main.contentType && (
-                      <Badge className="mb-2">{component.contents.main.contentType}</Badge>
+                    {component.contents.main.content_type && (
+                      <Badge className="mb-2">{component.contents.main.content_type}</Badge>
                     )}
                     <h3 className="text-2xl font-bold mb-2">{component.contents.main.translations[0]?.title}</h3>
                     <p className="text-gray-600 mb-4">{component.contents.main.translations[0]?.description}</p>
@@ -229,9 +229,9 @@ export const PreviewDialog = ({
                   return (
                     <div key={i} className="border rounded-md overflow-hidden">
                       <div className="aspect-video bg-gray-200">
-                        {secondaryContent?.featuredImage ? (
+                        {secondaryContent?.featured_image ? (
                           <img 
-                            src={secondaryContent.featuredImage} 
+                            src={secondaryContent.featured_image} 
                             alt={secondaryContent.translations[0]?.title || ''} 
                             className="w-full h-full object-cover"
                           />
@@ -274,9 +274,9 @@ export const PreviewDialog = ({
                         {tertiaryContent ? (
                           <div className="flex items-center">
                             <div className="w-12 h-12 bg-gray-200 rounded-md mr-3 flex-shrink-0">
-                              {tertiaryContent.featuredImage ? (
+                              {tertiaryContent.featured_image ? (
                                 <img 
-                                  src={tertiaryContent.featuredImage} 
+                                  src={tertiaryContent.featured_image} 
                                   alt={tertiaryContent.translations[0]?.title || ''} 
                                   className="w-full h-full object-cover rounded-md"
                                 />

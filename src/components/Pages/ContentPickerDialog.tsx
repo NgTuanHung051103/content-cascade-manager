@@ -87,7 +87,9 @@ export const ContentPickerDialog = ({
     onOpenChange(false);
   };
 
-  const getContentTypeLabel = (type: string) => {
+  const getContentTypeLabel = (type: string | undefined) => {
+    if (!type) return 'Content';
+    
     switch(type) {
       case 'article': return 'Article';
       case 'product': return 'Product';
@@ -119,9 +121,9 @@ export const ContentPickerDialog = ({
           )}
           
           <div className="aspect-video bg-gray-100 rounded-sm mb-2 flex items-center justify-center text-gray-400">
-            {content.featuredImage 
+            {content.featured_image 
               ? <img 
-                  src={content.featuredImage} 
+                  src={content.featured_image} 
                   alt={content.translations[0]?.title || ''} 
                   className="w-full h-full object-cover rounded-sm"
                 />
@@ -134,7 +136,7 @@ export const ContentPickerDialog = ({
             {content.translations[0]?.description || 'No description'}
           </p>
           <div className="mt-2 flex items-center justify-between">
-            <Badge variant="outline">{getContentTypeLabel(content.contentType)}</Badge>
+            <Badge variant="outline">{getContentTypeLabel(content.content_type)}</Badge>
             <span className="text-xs text-muted-foreground">
               {new Date(content.updatedAt).toLocaleDateString()}
             </span>
@@ -155,9 +157,9 @@ export const ContentPickerDialog = ({
           onClick={() => handleSelectContent(content)}
         >
           <div className="w-16 h-16 bg-gray-100 rounded-sm mr-3 flex-shrink-0">
-            {content.featuredImage 
+            {content.featured_image 
               ? <img 
-                  src={content.featuredImage} 
+                  src={content.featured_image} 
                   alt={content.translations[0]?.title || ''} 
                   className="w-full h-full object-cover rounded-sm"
                 />
@@ -171,7 +173,7 @@ export const ContentPickerDialog = ({
               {content.translations[0]?.description || 'No description'}
             </p>
             <div className="mt-1 flex items-center">
-              <Badge variant="outline" className="mr-2">{getContentTypeLabel(content.contentType)}</Badge>
+              <Badge variant="outline" className="mr-2">{getContentTypeLabel(content.content_type)}</Badge>
               <span className="text-xs text-muted-foreground">
                 {new Date(content.updatedAt).toLocaleDateString()}
               </span>
@@ -188,7 +190,7 @@ export const ContentPickerDialog = ({
 
   const renderContentList = (contentList: Content[], tabType?: string) => {
     const filteredTabContents = tabType 
-      ? contentList.filter(content => content.contentType === tabType)
+      ? contentList.filter(content => content.content_type === tabType)
       : contentList;
       
     if (filteredTabContents.length === 0) {

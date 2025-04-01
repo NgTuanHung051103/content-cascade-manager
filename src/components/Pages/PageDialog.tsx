@@ -44,6 +44,8 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
 
   // Generate a slug from title
   const generateSlug = (text: string) => {
+    if (!text) return '';
+    
     return text
       .toLowerCase()
       .replace(/\s+/g, '-')
@@ -91,8 +93,16 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
     onOpenChange(false);
   };
   
+  const handleClose = () => {
+    // Reset form when closing dialog
+    setTitle('');
+    setSlug('');
+    setStatus('draft');
+    onOpenChange(false);
+  };
+  
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Page' : 'Add New Page'}</DialogTitle>
@@ -149,7 +159,7 @@ export const PageDialog = ({ open, onOpenChange, page }: PageDialogProps) => {
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
           <Button onClick={handleSave}>{isEditing ? 'Save Changes' : 'Create Page'}</Button>
