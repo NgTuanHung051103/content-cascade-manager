@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   DragDropContext, 
@@ -18,8 +17,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Trash,
   Settings,
-  Pencil,
-  Plus,
   LayoutGrid,
   Save,
   X,
@@ -28,9 +25,10 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { ComponentSettingsDialog } from './ComponentSettingsDialog';
 import { ContentPickerDialog } from './ContentPickerDialog';
-import { Page, Content, PageComponent } from '@/data/mockData';
+import { Page, Content } from '@/data/mockData';
+import { PageComponent } from '@/types/page';
 import { PreviewDialog } from './PreviewDialog';
-import { TreeBranchEditor } from './TreeBranchEditor';
+import { EmptyComponentsPlaceholder } from './EmptyComponentsPlaceholder';
 import { ComponentList } from './ComponentList';
 import { ComponentRenderer } from './ComponentRenderer';
 
@@ -232,21 +230,17 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     
     setComponents(components.map(c => {
       if (c.id === component.id) {
-        const updatedContents = { ...c.contents };
-        const updatedSettings = { ...c.settings || {} };
+        const updatedContents = { ...(c.contents || {}) };
+        const updatedSettings = { ...(c.settings || {}) };
         
-        // Add new branch to contents
         updatedContents[newBranchKey] = null;
         
-        // Add child items for the new branch
         for (let i = 1; i <= 4; i++) {
           updatedContents[`${newBranchKey}-child-${i}`] = null;
         }
         
-        // Set active status for new branch
         updatedSettings[`${newBranchKey}-active`] = true;
         
-        // Set active status for child items
         for (let i = 1; i <= 4; i++) {
           updatedSettings[`${newBranchKey}-child-${i}-active`] = true;
         }

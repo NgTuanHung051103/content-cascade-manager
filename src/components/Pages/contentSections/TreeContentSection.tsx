@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Pencil, Plus } from 'lucide-react';
-import { PageComponent, Content } from '@/data/mockData';
+import { Content } from '@/data/mockData';
+import { PageComponent } from '@/types/page';
 import { TreeBranchEditor } from '../TreeBranchEditor';
 
 interface TreeContentSectionProps {

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Content } from '@/data/mockData';
@@ -70,9 +69,8 @@ export const TreeBranchEditor: React.FC<TreeBranchEditorProps> = ({
           </Button>
         </div>
         <div className="grid grid-cols-2 gap-1">
-          {Array.from({ length: 4 }).map((_, j) => {
-            const childPositionKey = `${positionKey}-child-${j + 1}`;
-            const isChildActive = !(childContents[childPositionKey]?.isActive === false);
+          {Object.keys(childContents).map((childKey, j) => {
+            const isChildActive = !(childContents[childKey] === null);
             
             return (
               <div key={j} className={`border rounded p-1 ${isChildActive ? 'bg-white' : 'bg-gray-200'}`}>
@@ -82,7 +80,7 @@ export const TreeBranchEditor: React.FC<TreeBranchEditorProps> = ({
                       variant="ghost" 
                       size="sm"
                       className="h-4 w-4 p-0"
-                      onClick={() => onToggleActive(childPositionKey)}
+                      onClick={() => onToggleActive(childKey)}
                     >
                       <div className={`h-2 w-2 rounded-full ${isChildActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                     </Button>
@@ -91,14 +89,14 @@ export const TreeBranchEditor: React.FC<TreeBranchEditorProps> = ({
                     variant="outline" 
                     size="sm"
                     className="h-5 text-xs px-1"
-                    onClick={() => onPickChildContent(childPositionKey)}
+                    onClick={() => onPickChildContent(childKey)}
                   >
                     Pick
                   </Button>
                 </div>
-                {childContents[childPositionKey] && (
+                {childContents[childKey] && (
                   <div className="mt-1 text-xs p-1 bg-violet-50 rounded border border-violet-100 text-[10px] truncate">
-                    {childContents[childPositionKey]?.translations[0]?.title || 'Untitled'}
+                    {childContents[childKey]?.translations[0]?.title || 'Untitled'}
                   </div>
                 )}
               </div>

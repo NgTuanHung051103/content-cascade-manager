@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Content } from '@/data/mockData';
@@ -41,9 +40,9 @@ export const TreeBranch: React.FC<TreeBranchProps> = ({
       <div className={`border rounded-lg overflow-hidden ${!isActive ? 'bg-gray-100' : ''}`}>
         <div className="flex p-4 gap-4 items-center">
           <div className="w-16 h-16 bg-gray-200 rounded-md flex-shrink-0">
-            {branchContent?.featured_image ? (
+            {branchContent && branchContent.translations && branchContent.translations[0] && branchContent.translations[0].image ? (
               <img 
-                src={branchContent.featured_image} 
+                src={branchContent.translations[0].image} 
                 alt={branchContent.translations[0]?.title || ''} 
                 className="w-full h-full object-cover rounded-md"
               />
@@ -69,9 +68,7 @@ export const TreeBranch: React.FC<TreeBranchProps> = ({
         {isActive && (
           <div className="p-2 border-t">
             <div className="grid grid-cols-2 gap-2">
-              {Array.from({ length: 4 }).map((_, j) => {
-                const childKey = `${primaryKey}-child-${j + 1}`;
-                const childContent = childContents[childKey];
+              {Object.entries(childContents).map(([childKey, childContent], j) => {
                 const isChildActive = settings?.[`${childKey}-active`] !== false;
                 
                 return (

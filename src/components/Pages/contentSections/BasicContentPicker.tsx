@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
-import { PageComponent } from '@/data/mockData';
+import { PageComponent } from '@/types/page';
 
 interface BasicContentPickerProps {
   component: PageComponent;
