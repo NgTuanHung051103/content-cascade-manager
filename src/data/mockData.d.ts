@@ -10,6 +10,7 @@ declare module '@/data/mockData' {
       languageId: string;
       title: string;
       description: string;
+      image?: string; // Added missing property
     }[];
     details: {
       id: string;
@@ -25,16 +26,16 @@ declare module '@/data/mockData' {
     imageIds: string[];
     createdAt: string;
     updatedAt: string;
-    featured_image?: string;
-    content_type?: string;
+    featured_image?: string; // Added missing property
+    content_type?: string; // Added missing property
     isActive?: boolean;
   }
 
   export interface Image {
     id: string;
-    src: string;
-    name: string;
-    type: string;
+    src: string; // Added missing property
+    name: string; // Added missing property
+    type: string; // Added missing property
     size: number;
     width: number;
     height: number;

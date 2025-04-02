@@ -40,16 +40,18 @@ export const TreeBranch: React.FC<TreeBranchProps> = ({
       <div className={`border rounded-lg overflow-hidden ${!isActive ? 'bg-gray-100' : ''}`}>
         <div className="flex p-4 gap-4 items-center">
           <div className="w-16 h-16 bg-gray-200 rounded-md flex-shrink-0">
-            {branchContent && branchContent.translations && branchContent.translations[0] && branchContent.translations[0].image ? (
-              <img 
-                src={branchContent.translations[0].image} 
-                alt={branchContent.translations[0]?.title || ''} 
-                className="w-full h-full object-cover rounded-md"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-400 text-xs">
-                No img
-              </div>
+            {branchContent && branchContent.translations && branchContent.translations[0] && (
+              branchContent.translations[0].image || branchContent.featured_image ? (
+                <img 
+                  src={branchContent.translations[0].image || branchContent.featured_image} 
+                  alt={branchContent.translations[0]?.title || ''} 
+                  className="w-full h-full object-cover rounded-md"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                  No img
+                </div>
+              )
             )}
           </div>
           <div>
