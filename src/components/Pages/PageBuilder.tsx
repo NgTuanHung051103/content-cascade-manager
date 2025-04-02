@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   DragDropContext, 
   Droppable, 
-  Draggable 
+  Draggable,
+  DropResult
 } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { 
@@ -44,11 +45,10 @@ const availableComponents = [
   { type: 'tree', label: 'Tree Content' },
 ];
 
-const reorder = (list: any[], startIndex: number, endIndex: number) => {
+const reorder = (list: PageComponent[], startIndex: number, endIndex: number) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
-
   return result;
 };
 
@@ -80,18 +80,27 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     }
   }, [open, page]);
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = (result: DropResult) => {
     if (!result.destination) {
       return;
     }
 
-    const items = reorder(
+    if (result.destination.index === result.source.index) {
+      return;
+    }
+
+    const updatedComponents = reorder(
       components,
       result.source.index,
       result.destination.index
     );
 
-    setComponents(items);
+    setComponents(updatedComponents);
+    
+    toast({
+      title: "Component Reordered",
+      description: "Component has been moved to a new position.",
+    });
   };
 
   const addComponent = (type: string) => {
@@ -308,12 +317,16 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
                       )}
                       
                       {components.map((component, index) => (
-                        <Draggable key={component.id} draggableId={component.id} index={index}>
-                          {(provided) => (
+                        <Draggable 
+                          key={component.id} 
+                          draggableId={component.id} 
+                          index={index}
+                        >
+                          {(dragProvided) => (
                             <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
+                              ref={dragProvided.innerRef}
+                              {...dragProvided.draggableProps}
+                              {...dragProvided.dragHandleProps}
                               className="border rounded p-4 bg-white shadow-sm"
                             >
                               <div className="flex justify-between items-center mb-2">
