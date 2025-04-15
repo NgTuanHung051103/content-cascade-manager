@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   DragDropContext, 
@@ -32,13 +33,18 @@ import { PreviewDialog } from './PreviewDialog';
 import { EmptyComponentsPlaceholder } from './EmptyComponentsPlaceholder';
 import { ComponentList } from './ComponentList';
 import { ComponentRenderer } from './ComponentRenderer';
+import { navigateToContent } from '@/services/navigationService';
 
 const availableComponents = [
+  { type: 'hero', label: 'Hero Banner' },
+  { type: 'stats', label: 'Statistics' },
+  { type: 'services', label: 'Services Section' },
+  { type: 'case-studies', label: 'Case Studies' },
+  { type: 'news', label: 'News Section' },
   { type: 'text', label: 'Text Block' },
   { type: 'image', label: 'Image' },
   { type: 'video', label: 'Video' },
   { type: 'gallery', label: 'Gallery' },
-  { type: 'hero', label: 'Hero Banner' },
   { type: 'featured', label: 'Featured Content' },
   { type: 'grid', label: 'Content Grid' },
   { type: 'hierarchy', label: 'Hierarchy Content' },

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -46,7 +45,6 @@ export const ComponentSettingsDialog = ({
 }: ComponentSettingsDialogProps) => {
   const [settings, setSettings] = useState<any>({});
   
-  // Reset settings when component changes
   useEffect(() => {
     if (component) {
       setSettings(component.settings || {});
@@ -72,71 +70,177 @@ export const ComponentSettingsDialog = ({
     switch(component.type) {
       case 'hero':
         return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="heroHeight">Banner Height</Label>
-              <Select 
-                value={settings.height || 'medium'} 
-                onValueChange={(value) => handleChange('height', value)}
-              >
-                <SelectTrigger id="heroHeight">
-                  <SelectValue placeholder="Select banner height" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="small">Small</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="large">Large</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <Tabs defaultValue="general">
+            <TabsList className="grid grid-cols-2 mb-6">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="navigation">Navigation</TabsTrigger>
+            </TabsList>
             
-            <div className="space-y-2">
-              <Label htmlFor="heroBackground">Background Style</Label>
-              <Select 
-                value={settings.background || 'light'} 
-                onValueChange={(value) => handleChange('background', value)}
-              >
-                <SelectTrigger id="heroBackground">
-                  <SelectValue placeholder="Select background style" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+            <TabsContent value="general" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="heroHeight">Banner Height</Label>
+                <Select 
+                  value={settings.height || 'medium'} 
+                  onValueChange={(value) => handleChange('height', value)}
+                >
+                  <SelectTrigger id="heroHeight">
+                    <SelectValue placeholder="Select banner height" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="heroBackground">Background Style</Label>
+                <Select 
+                  value={settings.background || 'light'} 
+                  onValueChange={(value) => handleChange('background', value)}
+                >
+                  <SelectTrigger id="heroBackground">
+                    <SelectValue placeholder="Select background style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="navigation" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="navigationType">Navigation Type</Label>
+                <Select 
+                  value={settings.navigationType || 'none'} 
+                  onValueChange={(value) => handleChange('navigationType', value)}
+                >
+                  <SelectTrigger id="navigationType">
+                    <SelectValue placeholder="Select navigation type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="url">External URL</SelectItem>
+                    <SelectItem value="content_detail">Content Detail</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {settings.navigationType === 'url' && (
+                <div className="space-y-2">
+                  <Label htmlFor="navigationUrl">URL</Label>
+                  <Input 
+                    id="navigationUrl" 
+                    value={settings.navigationUrl || ''} 
+                    onChange={(e) => handleChange('navigationUrl', e.target.value)}
+                    placeholder="https://example.com"
+                  />
+                </div>
+              )}
+              
+              {settings.navigationType === 'content_detail' && (
+                <div className="space-y-2">
+                  <Label htmlFor="navigationContentId">Content ID</Label>
+                  <Input 
+                    id="navigationContentId" 
+                    value={settings.navigationContentId || ''} 
+                    onChange={(e) => handleChange('navigationContentId', e.target.value)}
+                    placeholder="content-123"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter the ID of the content to navigate to its detail page.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         );
         
       case 'featured':
         return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="featuredColumns">Number of Columns</Label>
-              <Select 
-                value={settings.columns?.toString() || '3'} 
-                onValueChange={(value) => handleChange('columns', parseInt(value))}
-              >
-                <SelectTrigger id="featuredColumns">
-                  <SelectValue placeholder="Select number of columns" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2">2 Columns</SelectItem>
-                  <SelectItem value="3">3 Columns</SelectItem>
-                  <SelectItem value="4">4 Columns</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <Tabs defaultValue="general">
+            <TabsList className="grid grid-cols-2 mb-6">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="navigation">Navigation</TabsTrigger>
+            </TabsList>
             
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id="showImages" 
-                checked={settings.showImage !== false}
-                onCheckedChange={(checked) => handleChange('showImage', checked)}
-              />
-              <Label htmlFor="showImages">Show Featured Images</Label>
-            </div>
-          </div>
+            <TabsContent value="general" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="featuredColumns">Number of Columns</Label>
+                <Select 
+                  value={settings.columns?.toString() || '3'} 
+                  onValueChange={(value) => handleChange('columns', parseInt(value))}
+                >
+                  <SelectTrigger id="featuredColumns">
+                    <SelectValue placeholder="Select number of columns" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2 Columns</SelectItem>
+                    <SelectItem value="3">3 Columns</SelectItem>
+                    <SelectItem value="4">4 Columns</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="showImages" 
+                  checked={settings.showImage !== false}
+                  onCheckedChange={(checked) => handleChange('showImage', checked)}
+                />
+                <Label htmlFor="showImages">Show Featured Images</Label>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="navigation" className="space-y-4">
+              <div className="text-sm mb-4 p-3 bg-amber-50 border border-amber-200 rounded">
+                Each content item can have its own navigation settings. Configure them when selecting content.
+              </div>
+              
+              <div className="space-y-3">
+                {Array.from({ length: settings.columns || 3 }).map((_, i) => {
+                  const itemKey = `featured-${i + 1}`;
+                  return (
+                    <div key={i} className="border rounded p-3">
+                      <h4 className="font-medium mb-2">Item {i + 1}</h4>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`${itemKey}-navigationType`}>Navigation Type</Label>
+                        <Select 
+                          value={settings[`${itemKey}-navigationType`] || 'none'} 
+                          onValueChange={(value) => handleChange(`${itemKey}-navigationType`, value)}
+                        >
+                          <SelectTrigger id={`${itemKey}-navigationType`}>
+                            <SelectValue placeholder="Select navigation type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="url">External URL</SelectItem>
+                            <SelectItem value="content_detail">Content Detail</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {settings[`${itemKey}-navigationType`] === 'url' && (
+                        <div className="space-y-2 mt-2">
+                          <Label htmlFor={`${itemKey}-navigationUrl`}>URL</Label>
+                          <Input 
+                            id={`${itemKey}-navigationUrl`} 
+                            value={settings[`${itemKey}-navigationUrl`] || ''} 
+                            onChange={(e) => handleChange(`${itemKey}-navigationUrl`, e.target.value)}
+                            placeholder="https://example.com"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          </Tabs>
         );
         
       case 'grid':
@@ -362,6 +466,187 @@ export const ComponentSettingsDialog = ({
                   </SelectContent>
                 </Select>
               </div>
+            </TabsContent>
+          </Tabs>
+        );
+        
+      case 'stats':
+        return (
+          <Tabs defaultValue="general">
+            <TabsList className="grid grid-cols-2 mb-6">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="navigation">Navigation</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="general" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="statsBackground">Background Color</Label>
+                <Select 
+                  value={settings.backgroundColor || 'blue'} 
+                  onValueChange={(value) => handleChange('backgroundColor', value)}
+                >
+                  <SelectTrigger id="statsBackground">
+                    <SelectValue placeholder="Select background color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="teal">Teal</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="gray">Gray</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="statsLayout">Layout</Label>
+                <Select 
+                  value={settings.layout || 'grid'} 
+                  onValueChange={(value) => handleChange('layout', value)}
+                >
+                  <SelectTrigger id="statsLayout">
+                    <SelectValue placeholder="Select layout" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="grid">Grid</SelectItem>
+                    <SelectItem value="row">Row</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="navigation" className="space-y-4">
+              <div className="text-sm mb-4 p-3 bg-amber-50 border border-amber-200 rounded">
+                Each stat item can have its own navigation settings. Configure them when selecting content.
+              </div>
+              
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => {
+                  const itemKey = `stat-${i + 1}`;
+                  return (
+                    <div key={i} className="border rounded p-3">
+                      <h4 className="font-medium mb-2">Stat {i + 1}</h4>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`${itemKey}-navigationType`}>Navigation Type</Label>
+                        <Select 
+                          value={settings[`${itemKey}-navigationType`] || 'none'} 
+                          onValueChange={(value) => handleChange(`${itemKey}-navigationType`, value)}
+                        >
+                          <SelectTrigger id={`${itemKey}-navigationType`}>
+                            <SelectValue placeholder="Select navigation type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="url">External URL</SelectItem>
+                            <SelectItem value="content_detail">Content Detail</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {settings[`${itemKey}-navigationType`] === 'url' && (
+                        <div className="space-y-2 mt-2">
+                          <Label htmlFor={`${itemKey}-navigationUrl`}>URL</Label>
+                          <Input 
+                            id={`${itemKey}-navigationUrl`} 
+                            value={settings[`${itemKey}-navigationUrl`] || ''} 
+                            onChange={(e) => handleChange(`${itemKey}-navigationUrl`, e.target.value)}
+                            placeholder="https://example.com"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          </Tabs>
+        );
+      
+      case 'services':
+      case 'case-studies':
+      case 'news':
+        return (
+          <Tabs defaultValue="general">
+            <TabsList className="grid grid-cols-2 mb-6">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="navigation">Navigation</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="general" className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="contentTitle">Section Title</Label>
+                <Input 
+                  id="contentTitle" 
+                  value={settings.title || ''} 
+                  onChange={(e) => handleChange('title', e.target.value)}
+                  placeholder="Enter section title"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="contentLayout">Layout Style</Label>
+                <Select 
+                  value={settings.layoutStyle || 'grid'} 
+                  onValueChange={(value) => handleChange('layoutStyle', value)}
+                >
+                  <SelectTrigger id="contentLayout">
+                    <SelectValue placeholder="Select layout style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="grid">Grid</SelectItem>
+                    <SelectItem value="carousel">Carousel</SelectItem>
+                    <SelectItem value="list">List</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="contentCount">Items per row</Label>
+                <Select 
+                  value={settings.itemsPerRow?.toString() || '3'} 
+                  onValueChange={(value) => handleChange('itemsPerRow', parseInt(value))}
+                >
+                  <SelectTrigger id="contentCount">
+                    <SelectValue placeholder="Select items per row" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2 Items</SelectItem>
+                    <SelectItem value="3">3 Items</SelectItem>
+                    <SelectItem value="4">4 Items</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="navigation" className="space-y-4">
+              <div className="text-sm mb-4 p-3 bg-amber-50 border border-amber-200 rounded">
+                Each content item can have its own navigation settings. Configure them when selecting content.
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="viewAllButton">View All Button</Label>
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="viewAllButton" 
+                    checked={settings.showViewAll !== false}
+                    onCheckedChange={(checked) => handleChange('showViewAll', checked)}
+                  />
+                  <Label htmlFor="viewAllButton">Show "View All" button</Label>
+                </div>
+              </div>
+              
+              {settings.showViewAll !== false && (
+                <div className="space-y-2">
+                  <Label htmlFor="viewAllUrl">View All URL</Label>
+                  <Input 
+                    id="viewAllUrl" 
+                    value={settings.viewAllUrl || ''} 
+                    onChange={(e) => handleChange('viewAllUrl', e.target.value)}
+                    placeholder="https://example.com/all-items"
+                  />
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         );

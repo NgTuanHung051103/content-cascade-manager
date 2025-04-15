@@ -29,6 +29,11 @@ declare module '@/data/mockData' {
     featured_image?: string; // Added missing property
     content_type?: string; // Added missing property
     isActive?: boolean;
+    navigation?: {
+      type: 'url' | 'content_detail';
+      url?: string;
+      contentId?: string;
+    };
   }
 
   export interface Image {
@@ -62,5 +67,14 @@ declare module '@/data/mockData' {
     type: string;
     contents?: { [key: string]: Content | null };
     settings?: any;
+  }
+
+  export interface ContentLanguage {
+    id: string;
+    contentId: string;
+    languageId: string;
+    title: string;
+    description: string;
+    image?: string;
   }
 }
