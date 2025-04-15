@@ -279,7 +279,8 @@ export const PageBuilder = ({ open, onOpenChange, page }: PageBuilderProps) => {
     addFeaturedItem,
     addGridRow,
     addTreeBranch,
-    openContentPicker
+    openContentPicker,
+    navigateToContent
   };
 
   return (

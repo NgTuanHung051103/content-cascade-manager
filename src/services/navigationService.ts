@@ -35,8 +35,8 @@ export const navigateToContent = (content: Content | null, options?: NavigationO
     }
   }
   
-  // Fallback to content's own navigation settings
-  if (content?.navigation) {
+  // Fallback to content's own navigation settings if available
+  if (content && 'navigation' in content && content.navigation) {
     if (content.navigation.type === 'url' && content.navigation.url) {
       window.open(content.navigation.url, '_blank');
       return;
